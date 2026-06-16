@@ -4,8 +4,14 @@ TaskFlow — AI-powered project management tool built with Next.js, NestJS, MySQ
 # Project Setup
 
 # Frontend
+```
 npx create-next-app@latest frontend --typescript --tailwind --app
+```
 
 # Backend
+```
 npx @nestjs/cli new backend
+```
+```
 cd backend && npm i @nestjs/sequelize sequelize sequelize-typescript mysql2 @nestjs/config @nestjs/jwt @nestjs/passport passport passport-jwt bcrypt class-validator class-transformer
+```
