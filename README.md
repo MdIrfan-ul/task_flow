@@ -15,3 +15,14 @@ npx @nestjs/cli new backend
 ```
 cd backend && npm i @nestjs/sequelize sequelize sequelize-typescript mysql2 @nestjs/config @nestjs/jwt @nestjs/passport passport passport-jwt bcrypt class-validator class-transformer
 ```
+
+# Project Structure
+
+taskflow/# GitHub repo root
+├──apps/
+├──backend/# NestJS
+└──frontend/# Next.js
+├──.gitignore
+├──.env.example# commit this, never .env
+└──README.md
+
