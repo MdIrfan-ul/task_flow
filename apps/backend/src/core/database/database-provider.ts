@@ -1,9 +1,9 @@
-import { Sequelize } from 'sequelize-typescript';
-import { sequelizeModels } from './sequelize.models';
-import { SEQUELIZE } from '../constants/database-constant';
 import { ConfigService } from '@nestjs/config';
+import { Sequelize } from 'sequelize-typescript';
+import { SEQUELIZE } from '../constants/database-constant';
+import { sequelizeModels } from './sequelize.models';
 
-export const databaseProviders = [
+export const DatabaseProviders = [
     {
         provide: SEQUELIZE,
         inject: [ConfigService],
@@ -15,10 +15,18 @@ export const databaseProviders = [
                 username: configService.get<string>('DB_USERNAME'),
                 password: configService.get<string>('DB_PASSWORD'),
                 database: configService.get<string>('DB_NAME'),
-                logging: false,
+                logging: configService.get('NODE_ENV') === 'development',
             });
+
             sequelize.addModels(sequelizeModels);
-            await sequelize.sync();
+
+            await sequelize.authenticate();
+
+            // Sync only in development
+            if (configService.get('ENVIRONMENT') === 'DEVELOPMENT') {
+                await sequelize.sync();
+            }
+
             return sequelize;
         },
     },
