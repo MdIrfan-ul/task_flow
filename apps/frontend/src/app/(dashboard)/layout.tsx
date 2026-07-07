@@ -1,15 +1,23 @@
-// app/layout.tsx
-import { AuthProvider } from "@/context/AuthContext";
-import { ToastProvider } from "@/components/ui/Toast";
+"use client";
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+import RequireAuth from "@/context/RequireAuth";
+import DashboardShell from "@/components/layout/DashboardShell";
+import { useAuth } from "@/context/AuthContext";
+
+function ShellWrapper({ children }: { children: React.ReactNode }) {
+    const { user } = useAuth();
+    if (!user) return null;
+    return <DashboardShell user={user}>{children}</DashboardShell>;
+}
+
+export default function DashboardLayout({
+    children,
+}: {
+    children: React.ReactNode;
+}) {
     return (
-        <html lang="en">
-            <body>
-                <AuthProvider>
-                    <ToastProvider>{children}</ToastProvider>
-                </AuthProvider>
-            </body>
-        </html>
+        <RequireAuth>
+            <ShellWrapper>{children}</ShellWrapper>
+        </RequireAuth>
     );
 }

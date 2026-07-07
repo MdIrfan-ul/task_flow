@@ -1,49 +1,130 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* ─── Design tokens ────────────────────────────────────────────────── */
+@theme {
+  /* Fonts */
+  --font-sans: "Inter", sans-serif;
+
+  /* Colors */
+  --color-background: #faf8ff;
+  --color-surface: #faf8ff;
+  --color-surface-dim: #d2d9f4;
+  --color-surface-variant: #dae2fd;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f2f3ff;
+  --color-surface-container: #eaedff;
+  --color-surface-container-high: #e2e7ff;
+  --color-surface-container-highest: #dae2fd;
+
+  --color-on-surface: #131b2e;
+  --color-on-surface-variant: #434655;
+  --color-on-background: #131b2e;
+  --color-inverse-surface: #283044;
+  --color-inverse-on-surface: #eef0ff;
+
+  --color-primary: #004ac6;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #2563eb;
+  --color-on-primary-container: #eeefff;
+  --color-primary-fixed: #dbe1ff;
+  --color-primary-fixed-dim: #b4c5ff;
+  --color-on-primary-fixed: #00174b;
+  --color-on-primary-fixed-variant: #003ea8;
+  --color-inverse-primary: #b4c5ff;
+
+  --color-secondary: #4648d4;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #6063ee;
+  --color-on-secondary-container: #fffbff;
+  --color-secondary-fixed: #e1e0ff;
+  --color-secondary-fixed-dim: #c0c1ff;
+  --color-on-secondary-fixed: #07006c;
+  --color-on-secondary-fixed-variant: #2f2ebe;
+
+  --color-tertiary: #7a1bc8;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #943fe2;
+  --color-on-tertiary-container: #faecff;
+  --color-tertiary-fixed: #f0dbff;
+  --color-tertiary-fixed-dim: #ddb7ff;
+  --color-on-tertiary-fixed: #2c0051;
+  --color-on-tertiary-fixed-variant: #6900b3;
+
+  --color-error: #ba1a1a;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffdad6;
+  --color-on-error-container: #93000a;
+
+  --color-outline: #737686;
+  --color-outline-variant: #c3c6d7;
+
+  /* Border radius */
+  --radius-sm: 0.25rem;
+  --radius: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-card: 0px 4px 20px rgba(0, 0, 0, 0.04);
+  --shadow-overlay: 0px 8px 40px rgba(0, 0, 0, 0.08);
+
+  /* Spacing */
+  --spacing-sidebar-width: 260px;
+  --spacing-header-height: 64px;
+
+  /* Font sizes */
+  --text-display-lg: 48px;
+  --text-headline-lg: 32px;
+  --text-headline-md: 24px;
+  --text-headline-sm: 20px;
+  --text-body-lg: 18px;
+  --text-body-md: 16px;
+  --text-body-sm: 14px;
+  --text-label-md: 14px;
+  --text-label-sm: 12px;
+}
 
 /* ─── Base ─────────────────────────────────────────────────────────── */
 @layer base {
-  * {
+
+  *,
+  *::before,
+  *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
   }
 
   html {
-    font-family: 'Inter', sans-serif;
+    font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
   }
 
   body {
-    background-color: #faf8ff;
-    color: #131b2e;
-  }
-
-  /* Remove default focus outline — we use custom rings */
-  *:focus {
-    outline: none;
+    background-color: var(--color-background);
+    color: var(--color-on-surface);
   }
 
   *:focus-visible {
-    @apply ring-2 ring-primary ring-offset-2 ring-offset-background;
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 }
 
 /* ─── Components ───────────────────────────────────────────────────── */
 @layer components {
 
-  /* Glass panel — used for AI Insights, charts */
+  /* Glass panel */
   .glass-panel {
     backdrop-filter: blur(12px);
     background: rgba(255, 255, 255, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.3);
   }
 
-  /* AI gradient border — used for AI feature cards */
+  /* AI gradient border */
   .ai-gradient-border {
     position: relative;
     background: rgba(255, 255, 255, 0.6);
@@ -54,118 +135,232 @@
   .ai-gradient-border::before {
     content: '';
     position: absolute;
-    top: -1px;
-    bottom: -1px;
-    left: -1px;
-    right: -1px;
+    inset: -1px;
     z-index: -1;
     border-radius: inherit;
     background: linear-gradient(135deg, #7a1bc8, #0053db, #2563eb);
     opacity: 0.4;
   }
 
-  /* Sidebar active nav item */
-  .nav-item-active {
-    @apply bg-surface-container text-primary font-medium;
-    border-left: 2px solid #004ac6;
-  }
-
+  /* Nav items */
   .nav-item {
-    @apply flex items-center gap-3 px-4 py-2.5 rounded-md text-on-surface-variant text-body-sm cursor-pointer transition-all duration-150;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 1rem;
+    border-radius: var(--radius);
+    color: var(--color-on-surface-variant);
+    font-size: var(--text-body-sm);
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
   }
 
   .nav-item:hover {
-    @apply bg-surface-container-low text-on-surface;
+    background: var(--color-surface-container-low);
+    color: var(--color-on-surface);
+  }
+
+  .nav-item-active {
+    background: var(--color-surface-container);
+    color: var(--color-primary);
+    font-weight: 500;
+    border-left: 2px solid var(--color-primary);
   }
 
   /* Stat card */
   .stat-card {
-    @apply bg-surface-container-lowest rounded-md p-stack-md shadow-card border border-outline-variant/30;
+    background: var(--color-surface-container-lowest);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    box-shadow: var(--shadow-card);
+    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 30%, transparent);
   }
 
   /* Priority badges */
   .badge-high {
-    @apply bg-error-container text-on-error-container text-label-sm px-2 py-0.5 rounded-full;
+    background: var(--color-error-container);
+    color: var(--color-on-error-container);
+    font-size: var(--text-label-sm);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
   }
 
   .badge-medium {
-    @apply bg-tertiary-fixed text-on-tertiary-fixed text-label-sm px-2 py-0.5 rounded-full;
+    background: var(--color-tertiary-fixed);
+    color: var(--color-on-tertiary-fixed);
+    font-size: var(--text-label-sm);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
   }
 
   .badge-low {
-    @apply bg-surface-container-high text-on-surface-variant text-label-sm px-2 py-0.5 rounded-full;
+    background: var(--color-surface-container-high);
+    color: var(--color-on-surface-variant);
+    font-size: var(--text-label-sm);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
   }
 
   /* Status badges */
   .status-todo {
-    @apply bg-surface-container text-on-surface-variant text-label-sm px-2 py-0.5 rounded-full;
+    background: var(--color-surface-container);
+    color: var(--color-on-surface-variant);
+    font-size: var(--text-label-sm);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
   }
 
   .status-in-progress {
-    @apply bg-primary-fixed text-on-primary-fixed text-label-sm px-2 py-0.5 rounded-full;
+    background: var(--color-primary-fixed);
+    color: var(--color-on-primary-fixed);
+    font-size: var(--text-label-sm);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
   }
 
   .status-done {
-    @apply bg-secondary-fixed text-on-secondary-fixed text-label-sm px-2 py-0.5 rounded-full;
+    background: var(--color-secondary-fixed);
+    color: var(--color-on-secondary-fixed);
+    font-size: var(--text-label-sm);
+    padding: 0.125rem 0.5rem;
+    border-radius: var(--radius-full);
+    font-weight: 600;
   }
 
-  /* Kanban column */
+  /* Kanban */
   .kanban-column {
-    @apply flex flex-col gap-3 w-80 min-h-96 p-3 bg-surface-container-low rounded-md;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 20rem;
+    min-height: 24rem;
+    padding: 0.75rem;
+    background: var(--color-surface-container-low);
+    border-radius: var(--radius-md);
+    flex-shrink: 0;
   }
 
-  /* Task card */
   .task-card {
-    @apply bg-surface-container-lowest rounded-md p-4 shadow-card border border-outline-variant/20 cursor-grab active:cursor-grabbing transition-all duration-150;
+    background: var(--color-surface-container-lowest);
+    border-radius: var(--radius-md);
+    padding: 1rem;
+    box-shadow: var(--shadow-card);
+    border: 1px solid color-mix(in srgb, var(--color-outline-variant) 20%, transparent);
+    cursor: grab;
+    transition: all 0.15s;
   }
 
   .task-card:hover {
-    @apply shadow-overlay border-outline-variant/40 -translate-y-0.5;
+    box-shadow: var(--shadow-overlay);
+    border-color: color-mix(in srgb, var(--color-outline-variant) 40%, transparent);
+    transform: translateY(-1px);
+  }
+
+  .task-card:active {
+    cursor: grabbing;
   }
 
   /* Input */
   .input-field {
-    @apply w-full px-4 py-2.5 bg-surface-container-lowest border border-outline-variant rounded-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 transition-all duration-150;
+    width: 100%;
+    padding: 0.625rem 1rem;
+    background: var(--color-surface-container-lowest);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius);
+    font-size: var(--text-body-md);
+    color: var(--color-on-surface);
+    transition: all 0.15s;
+  }
+
+  .input-field::placeholder {
+    color: color-mix(in srgb, var(--color-on-surface-variant) 60%, transparent);
   }
 
   .input-field:focus {
-    @apply border-primary ring-2 ring-primary/20;
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 20%, transparent);
   }
 
   /* Buttons */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-primary text-on-primary text-label-md rounded-full font-medium transition-all duration-150 cursor-pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: var(--color-primary);
+    color: var(--color-on-primary);
+    border-radius: var(--radius-full);
+    font-size: var(--text-label-md);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
   }
 
   .btn-primary:hover {
-    @apply bg-primary/90 shadow-card;
+    background: color-mix(in srgb, var(--color-primary) 90%, black);
+    box-shadow: var(--shadow-card);
   }
 
   .btn-primary:disabled {
-    @apply opacity-50 cursor-not-allowed;
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-transparent border border-outline-variant text-on-surface text-label-md rounded-full font-medium transition-all duration-150 cursor-pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    background: transparent;
+    color: var(--color-on-surface);
+    border: 1px solid var(--color-outline-variant);
+    border-radius: var(--radius-full);
+    font-size: var(--text-label-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
   }
 
   .btn-secondary:hover {
-    @apply bg-surface-container;
+    background: var(--color-surface-container);
   }
 
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2 bg-transparent text-on-surface-variant text-label-md rounded-md font-medium transition-all duration-150 cursor-pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: transparent;
+    color: var(--color-on-surface-variant);
+    border: none;
+    border-radius: var(--radius);
+    font-size: var(--text-label-md);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
   }
 
   .btn-ghost:hover {
-    @apply bg-surface-container text-on-surface;
+    background: var(--color-surface-container);
+    color: var(--color-on-surface);
   }
 }
 
 /* ─── Utilities ────────────────────────────────────────────────────── */
 @layer utilities {
-
-  /* Custom scrollbar */
   .scrollbar-thin::-webkit-scrollbar {
     width: 4px;
   }
@@ -175,11 +370,10 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background: #d2d9f4;
+    background: var(--color-surface-dim);
     border-radius: 10px;
   }
 
-  /* Text truncate 2 lines */
   .line-clamp-2 {
     display: -webkit-box;
     -webkit-line-clamp: 2;

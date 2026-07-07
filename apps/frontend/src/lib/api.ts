@@ -31,7 +31,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 if (!API_BASE_URL && typeof window !== "undefined") {
     // Fail loud in dev rather than silently hitting a relative URL.
     console.error(
-        "NEXT_PUBLIC_API_URL is not set. API requests will fail."
+        "NEXT_PUBLIC_API_URL is not set. API requests will fail.", API_BASE_URL
     );
 }
 
