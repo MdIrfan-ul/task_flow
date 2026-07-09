@@ -29,10 +29,10 @@ export default function DashboardShell({ children, user }: DashboardShellProps) 
                 </main>
             </div>
 
-            <CreateProjectModal
+            {/* <CreateProjectModal
                 isOpen={isCreateProjectOpen}
                 onClose={() => setIsCreateProjectOpen(false)}
-            />
+            /> */}
         </div>
     );
 }

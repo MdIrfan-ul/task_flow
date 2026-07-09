@@ -1,16 +1,17 @@
-import { Body, Controller, Get, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
 import { GoogleAuthGuard } from 'src/auth/guards/google.guard';
 import { GitHubAuthGuard } from 'src/auth/guards/github.guard';
 import { RegisterInput } from './dto/register.dto';
+import { JwtAuthGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) { }
 
-  @Get('register')
-  registerUser(
+  @Post('register')
+  async registerUser(
     @Body() registerInput: RegisterInput
   ) {
     return this.authService.registerUser(registerInput);
@@ -33,5 +34,11 @@ export class AuthController {
   @UseGuards(GitHubAuthGuard)
   getGitHubCallback(@Req() req: Request, @Res() res: Response) {
     req.user;
+  }
+
+  @Post('refresh')
+  @UseGuards(JwtAuthGuard)
+  refreshAuth(@Req() req: Request, @Res() res: Response) {
+
   }
 }

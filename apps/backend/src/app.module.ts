@@ -17,7 +17,8 @@ import { JwtModule } from '@nestjs/jwt';
     }),
     DatabaseModule,
     UsersModule,
-    AuthModule],
+    AuthModule
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
