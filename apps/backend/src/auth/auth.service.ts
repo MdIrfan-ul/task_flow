@@ -9,6 +9,9 @@ export class AuthService {
         @InjectModel(User) private readonly userRepo: typeof User
     ) { }
     async registerUser(registerInput: RegisterInput) {
-
+        const { email, password, name } = registerInput;
+        const user = await this.userRepo.create({ name, email, password });
+        return user;
     }
+
 }

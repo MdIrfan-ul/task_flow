@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import type { Request, Response } from 'express';
 import { GoogleAuthGuard } from 'src/auth/guards/google.guard';
@@ -8,13 +8,14 @@ import { JwtAuthGuard } from './guards';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   constructor(private readonly authService: AuthService) { }
 
   @Post('register')
   async registerUser(
     @Body() registerInput: RegisterInput
   ) {
-    return this.authService.registerUser(registerInput);
+    return await this.authService.registerUser(registerInput);
   }
   @Get('google')
   @UseGuards(GoogleAuthGuard)
