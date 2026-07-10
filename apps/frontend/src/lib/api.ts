@@ -92,8 +92,14 @@ export function registerAuthFailureHandler(handler: () => void) {
 }
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) => {
+        if (response.data?.data !== undefined && response.data?.success !== undefined) {
+            response.data = response.data.data;
+        }
+        return response;
+    },
     async (error: AxiosError) => {
+
         const originalRequest = error.config as InternalAxiosRequestConfig;
 
         const isUnauthorized = error.response?.status === 401;

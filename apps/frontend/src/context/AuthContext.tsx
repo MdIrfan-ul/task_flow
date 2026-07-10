@@ -67,6 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     useEffect(() => {
         let isMounted = true;
 
+        // restoreSession — interceptor already unwraps, so data IS AuthResponse directly
         async function restoreSession() {
             try {
                 const { data } = await api.post<AuthResponse>("/auth/refresh");
@@ -108,7 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 password,
             });
             setAccessToken(data.accessToken);
-            setUser(data.user);
+            setUser(data?.user);
             router.push("/dashboard");
         },
         [router]
