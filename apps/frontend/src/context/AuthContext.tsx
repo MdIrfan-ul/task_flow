@@ -114,19 +114,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         [router]
     );
 
-    const register = useCallback(
-        async ({ name, email, password }: RegisterPayload) => {
-            const data = await apiPost<AuthResponse>("/auth/register", {
-                name,
-                email,
-                password,
-            });
-            setAccessToken(data.accessToken);
-            setUser(data.user);
-            router.push("/dashboard");
-        },
-        [router]
-    );
+    const register = useCallback(async ({ name, email, password }: RegisterPayload) => {
+        await apiPost("/auth/register", { name, email, password });
+        router.push("/login?registered=true");
+    }, [router]);
 
     const logout = useCallback(async () => {
         try {
