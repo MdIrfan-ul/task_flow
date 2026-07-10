@@ -5,6 +5,8 @@ import { GoogleAuthGuard } from 'src/auth/guards/google.guard';
 import { GitHubAuthGuard } from 'src/auth/guards/github.guard';
 import { RegisterInput } from './dto/register.dto';
 import { JwtAuthGuard } from './guards';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +19,12 @@ export class AuthController {
   ) {
     return await this.authService.registerUser(registerInput);
   }
+
+  @Post('login')
+  async login(@Body() loginInput: LoginDto) {
+    return this.authService.login(loginInput);
+  }
+
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   getHello(@Res() res: Response) { }
@@ -38,7 +46,7 @@ export class AuthController {
   }
 
   @Post('refresh')
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtRefreshGuard)
   refreshAuth(@Req() req: Request, @Res() res: Response) {
 
   }

@@ -4,6 +4,8 @@ import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
 
 export class LoginDto {
     @IsEmail()
+    @IsNotEmpty()
+    @Transform(({ value }) => typeof value === "string" ? value.trim() : value)
     email: string;
 
     @IsString()
