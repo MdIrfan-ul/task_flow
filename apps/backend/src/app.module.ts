@@ -9,6 +9,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
+import { WorkspacesModule } from './workspaces/workspaces.module';
+import { ProjectsModule } from './projects/projects.module';
+import { TasksModule } from './tasks/tasks.module';
 
 @Module({
   imports: [
@@ -20,7 +23,10 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
     }),
     DatabaseModule,
     UsersModule,
-    AuthModule
+    AuthModule,
+    WorkspacesModule,
+    ProjectsModule,
+    TasksModule
   ],
   controllers: [AppController],
   providers: [AppService,
