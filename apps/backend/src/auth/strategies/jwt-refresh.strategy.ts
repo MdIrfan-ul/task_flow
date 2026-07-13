@@ -5,7 +5,7 @@ import { ExtractJwt, Strategy } from "passport-jwt"
 import { Request } from "express"
 
 interface JwtPayload {
-    sub: string
+    userId: string
     email: string
     role?: string
 }
@@ -25,6 +25,6 @@ export class JwtRefreshStrategy extends PassportStrategy(Strategy, "jwt-refresh"
 
     async validate(req: Request, payload: JwtPayload) {
         const refreshToken = req?.cookies?.refresh_token;
-        return { userId: payload.sub, email: payload.email, role: payload.role, refreshToken };
+        return { userId: payload.userId, email: payload.email, role: payload.role, refreshToken };
     }
 }

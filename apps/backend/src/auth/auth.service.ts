@@ -23,7 +23,7 @@ export class AuthService {
     ) { }
     async registerUser(registerInput: RegisterInput) {
         const { email, password, name } = registerInput;
-        const user = await this.userRepo.create({ name, email, password });
+        const user = await this.userRepo.create({ name, email, password, user_type: 'owner' });
         return user;
     }
 
@@ -68,7 +68,7 @@ export class AuthService {
         return {
             ...tokens,
             user: {
-                id: user.id,
+                userId: user.id,
                 name: user.name,
                 email: user.email,
                 role: user.user_type,
