@@ -7,6 +7,7 @@ import { WhereOptions } from 'sequelize';
 import { comparePassword } from 'src/utils/password.util';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { UserType } from 'src/users/enums/user-enum';
 
 export interface TokenPayload {
     userId: string,
@@ -23,7 +24,7 @@ export class AuthService {
     ) { }
     async registerUser(registerInput: RegisterInput) {
         const { email, password, name } = registerInput;
-        const user = await this.userRepo.create({ name, email, password, user_type: 'owner' });
+        const user = await this.userRepo.create({ name, email, password, user_type: UserType.OWNER });
         return user;
     }
 

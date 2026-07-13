@@ -11,20 +11,24 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { WorkspacesService } from './workspaces.service';
-import { JwtAuthGuard } from 'src/auth/guards';
+import { JwtAuthGuard, RolesGuard } from 'src/auth/guards';
 import { Request } from 'express';
 import { WorkspaceRole } from './entities/workspace-member.entity';
+import { UserType } from 'src/users/enums/user-enum';
+import { Roles } from 'src/common/decorators/roles.decorator';
 
 interface AuthRequest extends Request {
   user: { userId: number; email: string; role: string };
 }
 
 @Controller('workspaces')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class WorkspacesController {
   constructor(private readonly workspacesService: WorkspacesService) { }
 
   // POST /workspaces
+
+  @Roles(UserType.OWNER)
   @Post()
   create(@Req() req: AuthRequest, @Body('name') name: string) {
     return this.workspacesService.create(req.user.userId, name);
