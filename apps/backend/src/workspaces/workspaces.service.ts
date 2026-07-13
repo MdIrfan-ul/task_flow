@@ -114,7 +114,7 @@ export class WorkspacesService {
         await this.requireAdminOrOwner(workspaceId, requesterId);
 
         const member = await this.memberRepo.findOne({
-            where: { workspace_id: workspaceId, id: memberId },
+            where: { workspace_id: workspaceId, user_id: memberId },
         });
         if (!member) throw new NotFoundException('Member not found');
         if (member.role === WorkspaceRole.OWNER)
@@ -128,7 +128,7 @@ export class WorkspacesService {
         await this.requireOwner(workspaceId, requesterId);
 
         const member = await this.memberRepo.findOne({
-            where: { workspace_id: workspaceId, id: memberId },
+            where: { workspace_id: workspaceId, user_id: memberId },
         });
         if (!member) throw new NotFoundException('Member not found');
 

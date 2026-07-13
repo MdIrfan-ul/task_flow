@@ -35,12 +35,14 @@ export class WorkspacesController {
   }
 
   // GET /workspaces/mine
+  @Roles(UserType.OWNER, UserType.MEMBER)
   @Get('mine')
   findMine(@Req() req: AuthRequest) {
     return this.workspacesService.findAllByUser(req.user.userId);
   }
 
   // GET /workspaces/:id
+  @Roles(UserType.OWNER, UserType.MEMBER)
   @Get(':id')
   findOne(
     @Param('id', ParseIntPipe) id: number,
@@ -50,6 +52,7 @@ export class WorkspacesController {
   }
 
   // DELETE /workspaces/:id
+  @Roles(UserType.OWNER)
   @Delete(':id')
   delete(
     @Param('id', ParseIntPipe) id: number,
@@ -59,6 +62,7 @@ export class WorkspacesController {
   }
 
   // GET /workspaces/:id/members
+  @Roles(UserType.OWNER, UserType.MEMBER)
   @Get(':id/members')
   getMembers(
     @Param('id', ParseIntPipe) id: number,
@@ -67,7 +71,10 @@ export class WorkspacesController {
     return this.workspacesService.getMembers(id, req.user.userId);
   }
 
+
+
   // POST /workspaces/:id/invite
+  @Roles(UserType.OWNER)
   @Post(':id/invite')
   inviteMember(
     @Param('id', ParseIntPipe) id: number,
@@ -84,6 +91,7 @@ export class WorkspacesController {
   }
 
   // DELETE /workspaces/:id/members/:memberId
+  @Roles(UserType.OWNER)
   @Delete(':id/members/:memberId')
   removeMember(
     @Param('id', ParseIntPipe) id: number,
@@ -94,6 +102,7 @@ export class WorkspacesController {
   }
 
   // PATCH /workspaces/:id/members/:memberId
+  @Roles(UserType.OWNER)
   @Patch(':id/members/:memberId')
   updateMemberRole(
     @Param('id', ParseIntPipe) id: number,

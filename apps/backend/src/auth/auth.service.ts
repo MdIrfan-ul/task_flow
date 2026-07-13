@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { RegisterInput } from './dto/register.dto';
 import { InjectModel } from '@nestjs/sequelize';
 import { User } from 'src/users/entities/user.entity';
@@ -76,6 +76,29 @@ export class AuthService {
                 avatarUrl: user.profile ?? null,
             }
         }
+
+    }
+
+
+    async createMember(
+        email: string, name: string,
+        userId: number,
+    ) {
+
+        const checkOwner = await this.checkExistUser({ id: userId });
+        if (!checkOwner) {
+            throw new NotFoundException('owner not found.');
+        }
+        const checkUser = await this.checkExistUser({ email });
+        if (checkUser) throw new ConflictException(`user found with email ${email}`);
+
+        const create = await this.userRepo.create({
+            name,
+            email,
+            password: 'Test@123',// for temporary,
+            user_type: UserType.MEMBER
+        });
+        return create;
 
     }
 

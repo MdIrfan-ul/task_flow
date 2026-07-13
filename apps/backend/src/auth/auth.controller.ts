@@ -8,7 +8,12 @@ import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { LoginDto } from './dto/login.dto';
 import { ConfigService } from '@nestjs/config';
 import { User } from 'src/users/entities/user.entity';
-
+import { Roles } from 'src/common/decorators/roles.decorator';
+import { UserType } from 'src/users/enums/user-enum';
+import { JwtAuthGuard } from './guards';
+interface AuthRequest extends Request {
+  user: { userId: number; email: string; role: string };
+}
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
@@ -92,5 +97,19 @@ export class AuthController {
     });
 
     return { accessToken: tokens.accessToken };
+  }
+
+  @Post('members')
+  @UseGuards(JwtAuthGuard)
+  @Roles(UserType.OWNER)
+  createMember(
+    @Req() req: AuthRequest,
+    @Body('email') email: string,
+    @Body('name') name: string,
+  ) {
+    return this.authService.createMember(
+      email, name,
+      req.user.userId,
+    );
   }
 }
