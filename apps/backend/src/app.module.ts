@@ -12,6 +12,7 @@ import { ResponseInterceptor } from './common/interceptors/response.interceptor'
 import { WorkspacesModule } from './workspaces/workspaces.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { TasksModule } from './tasks/tasks.module';
     AuthModule,
     WorkspacesModule,
     ProjectsModule,
-    TasksModule
+    TasksModule,
+    AiModule
   ],
   controllers: [AppController],
   providers: [AppService,
