@@ -5,16 +5,20 @@ import OpenAI from 'openai';
 import { Task, TaskPriority, TaskStatus } from 'src/tasks/entities/task.entity';
 import { Project } from 'src/projects/entities/project.entity';
 import { User } from 'src/users/entities/user.entity';
+import { buildTaskPrompt, TASK_SYSTEM_PROMPT } from './prompts';
+import { buildProjectSummaryPrompt, PROJECT_SUMMARY_SYSTEM_PROMPT } from './prompts/summarize-workspace.prompt';
 
 export interface GeneratedTask {
     title: string;
     description: string;
     priority: TaskPriority;
+    due_date: string;
 }
 
 @Injectable()
 export class AiService {
     private readonly openai: OpenAI;
+    private readonly MODEL_NAME = 'llama-3.3-70b-versatile';
 
     constructor(
         private readonly configService: ConfigService,
@@ -22,7 +26,8 @@ export class AiService {
         @InjectModel(Project) private readonly projectRepo: typeof Project,
     ) {
         this.openai = new OpenAI({
-            apiKey: this.configService.get<string>('OPENAI_API_KEY'),
+            apiKey: this.configService.get<string>('GROQ_API_KEY'),
+            baseURL: "https://api.groq.com/openai/v1",
         });
     }
 
@@ -30,68 +35,64 @@ export class AiService {
 
     async generateTasks(goal: string): Promise<{ tasks: GeneratedTask[] }> {
         try {
+            const today = new Date().toISOString().split("T")[0];
             const response = await this.openai.chat.completions.create({
-                model: 'gpt-4o-mini',
+                model: "llama-3.3-70b-versatile",
                 max_tokens: 1000,
-                response_format: { type: 'json_object' },
+                temperature: 0.3,
                 messages: [
                     {
-                        role: 'system',
-                        content: `You are a project management assistant. Break down project goals into actionable developer tasks.
-Always respond with valid JSON only. No markdown, no explanation outside the JSON.`,
+                        role: "system",
+                        content: TASK_SYSTEM_PROMPT,
                     },
                     {
-                        role: 'user',
-                        content: `Break down this project goal into 8-12 developer tasks:
-"${goal}"
-
-Return a JSON object with this exact structure:
-{
-  "tasks": [
-    {
-      "title": "Short, actionable task title",
-      "description": "1-2 sentence description of what needs to be done",
-      "priority": "high" | "medium" | "low"
-    }
-  ]
-}
-
-Rules:
-- Tasks should be specific and actionable
-- Mix of high, medium, and low priority tasks
-- Order tasks logically (setup before implementation, implementation before testing)
-- Each task should be completable in 1-2 days`,
+                        role: "user",
+                        content: buildTaskPrompt(goal, today),
                     },
                 ],
             });
 
-            const content = response.choices[0]?.message?.content;
-            if (!content) throw new Error('No content from OpenAI');
+            const content = response.choices[0]?.message?.content?.trim();
 
-            const parsed = JSON.parse(content);
+            if (!content) {
+                throw new Error("No content from AI");
+            }
+            const cleaned = content
+                .replace(/^```json\s*/i, "")
+                .replace(/^```\s*/i, "")
+                .replace(/```$/, "")
+                .trim();
+
+            const parsed = JSON.parse(cleaned);
 
             if (!Array.isArray(parsed.tasks)) {
-                throw new Error('Invalid response structure from OpenAI');
+                throw new Error("Invalid response structure");
             }
 
-            // Validate and sanitize each task
             const tasks: GeneratedTask[] = parsed.tasks
                 .filter((t: any) => t.title && t.description)
                 .map((t: any) => ({
                     title: String(t.title).slice(0, 120),
                     description: String(t.description).slice(0, 500),
-                    priority: ['high', 'medium', 'low'].includes(t.priority)
+                    priority: ["high", "medium", "low"].includes(t.priority)
                         ? t.priority
                         : TaskPriority.MEDIUM,
+                    due_date: t.due_date
                 }));
 
             return { tasks };
         } catch (error) {
-            console.log(error);
+            console.error(error);
+
             if (error instanceof SyntaxError) {
-                throw new InternalServerErrorException('AI returned invalid response. Please try again.');
+                throw new InternalServerErrorException(
+                    "AI returned invalid JSON. Please try again."
+                );
             }
-            throw new InternalServerErrorException('Failed to generate tasks. Please try again.');
+
+            throw new InternalServerErrorException(
+                "Failed to generate tasks. Please try again."
+            );
         }
     }
 
@@ -160,20 +161,11 @@ Rules:
                 messages: [
                     {
                         role: 'system',
-                        content: 'You are a project management assistant. Summarize project progress concisely.',
+                        content: PROJECT_SUMMARY_SYSTEM_PROMPT,
                     },
                     {
                         role: 'user',
-                        content: `Project: "${project.name}"
-Tasks (${tasks.length} total):
-${taskList}
-
-Provide a progress summary as JSON:
-{
-  "summary": "2-3 sentence plain English summary of overall progress",
-  "highlights": ["up to 3 positive achievements or completed milestones"],
-  "blockers": ["up to 3 risks, blockers, or areas needing attention"]
-}`,
+                        content: buildProjectSummaryPrompt(project.name, taskList, taskList?.length),
                     },
                 ],
             });
