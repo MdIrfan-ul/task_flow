@@ -38,11 +38,12 @@ function getColorFromName(name: string): string {
 }
 
 export default function Avatar({ src, name, size = "md", online }: AvatarProps) {
+    const isValidSrc = typeof src === "string" && src.trim().length > 0;
     return (
         <div className="relative inline-block flex-shrink-0">
-            {src ? (
+            {isValidSrc ? (
                 <Image
-                    src={src}
+                    src={src as string}
                     alt={name}
                     width={56}
                     height={56}

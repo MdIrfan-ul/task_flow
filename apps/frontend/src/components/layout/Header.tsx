@@ -30,6 +30,11 @@ export default function Header({
         e.preventDefault();
         onSearch?.(query);
     };
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+    const avatarUrl = user.avatarUrl
+        ? `${API_BASE_URL}/${user.avatarUrl}`
+        : null;
 
     return (
         <header className="h-header-height bg-surface-container-lowest border-b border-outline-variant/30 flex items-center justify-between px-8 flex-shrink-0">
@@ -73,7 +78,7 @@ export default function Header({
                             {user.role}
                         </p>
                     </div>
-                    <Avatar src={user.avatarUrl} name={user.name} size="sm" />
+                    <Avatar src={avatarUrl} name={user.name} size="sm" />
                 </button>
             </div>
         </header>
