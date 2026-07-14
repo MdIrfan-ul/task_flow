@@ -23,6 +23,10 @@
     "strictBindCallApply": false,
     "ignoreDeprecations": "6.0",
     "noFallthroughCasesInSwitch": false,
-    "strictPropertyInitialization": false
+    "strictPropertyInitialization": false,
+    "types": [
+      "node",
+      "multer"
+    ]
   }
 }

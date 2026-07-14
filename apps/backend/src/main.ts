@@ -6,6 +6,7 @@ import { createCorsConfig } from './config/cors.config';
 import cookieParser from 'cookie-parser';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { Logger, LogLevel, ValidationPipe } from '@nestjs/common';
+import { IMAGES_ROOT } from './common/path';
 
 const configService = new ConfigService();
 const APP_PORT = configService.get<number>('APP_PORT') || 8000;
@@ -28,6 +29,7 @@ async function bootstrap() {
       transform: true
     }),
   );
+  app.useStaticAssets(IMAGES_ROOT, { prefix: '/images' });
   app.set('trust proxy', true);
   app.use(cookieParser());
 
