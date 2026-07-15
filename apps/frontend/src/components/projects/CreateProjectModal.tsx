@@ -6,6 +6,8 @@ import Modal from "../ui/Modal";
 import Button from "../ui/Button";
 import { Input, Textarea } from "../ui/Input";
 import { useToast } from "../ui/Toast";
+import { apiPost } from "@/lib/api";
+import { AxiosError } from "axios";
 
 interface CreateProjectModalProps {
     isOpen: boolean;
@@ -17,6 +19,12 @@ interface CreateProjectModalProps {
 interface FormState {
     name: string;
     description: string;
+}
+
+interface CreatedProject {
+    id: string;
+    name: string;
+    workspace_id: string | number;
 }
 
 const initialForm: FormState = { name: "", description: "" };
@@ -56,34 +64,32 @@ export default function CreateProjectModal({
         setError(null);
 
         try {
-            // TODO: replace with shared `api` client once lib/api.ts (axios + token
-            // refresh interceptor) is wired up. Keeping this self-contained for now.
-            const res = await fetch(
-                `${process.env.NEXT_PUBLIC_API_URL}/workspaces/${workspaceId}/projects`,
+            const project = await apiPost<CreatedProject>(
+                `/workspaces/${workspaceId}/projects`,
                 {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    credentials: "include",
-                    body: JSON.stringify({
-                        name: form.name.trim(),
-                        description: form.description.trim(),
-                    }),
+                    name: form.name.trim(),
+                    description: form.description.trim(),
                 }
             );
-
-            if (!res.ok) {
-                const data = await res.json().catch(() => null);
-                throw new Error(data?.message || "Failed to create project");
-            }
-
-            const project = await res.json();
 
             showToast("Project created", "success");
             onCreated?.(project);
             handleClose();
-            router.push(`/projects/${project.id}`);
+
+            // Use the workspace_id the API actually created the project under,
+            // rather than trusting the prop we were passed — this route only
+            // exists nested under a workspace (/workspaces/:id/projects/:id).
+            const url = `/workspaces/${workspaceId}/projects/${project.id}`;
+
+
+            // router.push(`/workspaces/${project.workspace_id}/projects/${project.id}`);
+            router.push(url);
         } catch (err) {
-            setError(err instanceof Error ? err.message : "Something went wrong");
+            const message =
+                err instanceof AxiosError
+                    ? err.response?.data?.message || "Failed to create project"
+                    : "Something went wrong";
+            setError(message);
         } finally {
             setIsSubmitting(false);
         }
