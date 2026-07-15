@@ -4,7 +4,7 @@ export interface Workspace {
     id: string;
     name: string;
     slug: string;
-    avatarUrl?: string | null;
+    avatar_url?: string | null;
     created_at: string;
     myRole: WorkspaceRole;
 }

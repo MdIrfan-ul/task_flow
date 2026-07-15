@@ -38,12 +38,13 @@ function getColorFromName(name: string): string {
 }
 
 export default function Avatar({ src, name, size = "md", online }: AvatarProps) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const isValidSrc = typeof src === "string" && src.trim().length > 0;
     return (
         <div className="relative inline-block flex-shrink-0">
             {isValidSrc ? (
                 <Image
-                    src={src as string}
+                    src={`${apiUrl}/${src}` as string}
                     alt={name}
                     width={56}
                     height={56}

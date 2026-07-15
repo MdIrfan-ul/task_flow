@@ -194,7 +194,7 @@ export default function WorkspacesPage() {
                             >
                                 {/* Card header */}
                                 <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                                    <Avatar src={ws.avatarUrl} name={ws.name} size="md" />
+                                    <Avatar src={ws.avatar_url} name={ws.name} size="md" />
                                     <div style={{ flex: 1, minWidth: 0 }}>
                                         <p style={{ fontSize: 16, fontWeight: 700, color: "var(--color-on-surface)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                                             {ws.name}

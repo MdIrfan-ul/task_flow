@@ -98,7 +98,7 @@ export default function WorkspaceDetailPage() {
             ) : (
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 32 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                        <Avatar src={workspace?.avatarUrl} name={workspace?.name ?? ""} size="lg" />
+                        <Avatar src={workspace?.avatar_url} name={workspace?.name ?? ""} size="lg" />
                         <div>
                             <h1 style={{ fontSize: 24, fontWeight: 700, color: "var(--color-on-surface)", marginBottom: 4 }}>
                                 {workspace?.name}
@@ -214,95 +214,100 @@ export default function WorkspaceDetailPage() {
                         </div>
                     )}
                 </>
-            )}
+            )
+            }
 
             {/* Members tab */}
-            {activeTab === "members" && (
-                <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-                    {/* Invite form — owners/admins only */}
-                    {isOwnerOrAdmin && (
-                        <div style={{ background: "var(--color-surface-container-lowest)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)", padding: "16px 20px" }}>
-                            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--color-on-surface)", marginBottom: 12 }}>
-                                Invite a member
-                            </p>
-                            <div style={{ display: "flex", gap: 10 }}>
-                                <Input
-                                    type="email"
-                                    placeholder="colleague@example.com"
-                                    value={inviteEmail}
-                                    onChange={(e) => setInviteEmail(e.target.value)}
-                                    onKeyDown={(e) => e.key === "Enter" && handleInvite()}
-                                />
-                                <Button variant="primary" onClick={handleInvite} isLoading={isInviting}>
-                                    Invite
-                                </Button>
+            {
+                activeTab === "members" && (
+                    <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                        {/* Invite form — owners/admins only */}
+                        {isOwnerOrAdmin && (
+                            <div style={{ background: "var(--color-surface-container-lowest)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)", padding: "16px 20px" }}>
+                                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--color-on-surface)", marginBottom: 12 }}>
+                                    Invite a member
+                                </p>
+                                <div style={{ display: "flex", gap: 10 }}>
+                                    <Input
+                                        type="email"
+                                        placeholder="colleague@example.com"
+                                        value={inviteEmail}
+                                        onChange={(e) => setInviteEmail(e.target.value)}
+                                        onKeyDown={(e) => e.key === "Enter" && handleInvite()}
+                                    />
+                                    <Button variant="primary" onClick={handleInvite} isLoading={isInviting}>
+                                        Invite
+                                    </Button>
+                                </div>
                             </div>
-                        </div>
-                    )}
+                        )}
 
-                    {/* Members list */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                        {isLoading ? (
-                            <><SkeletonRow /><SkeletonRow /><SkeletonRow /></>
-                        ) : (
-                            members.map((member) => {
-                                const roleStyle: Record<string, { bg: string; color: string }> = {
-                                    owner: { bg: "#dbe1ff", color: "#00174b" },
-                                    admin: { bg: "#e1e0ff", color: "#07006c" },
-                                    member: { bg: "#eaedff", color: "#434655" },
-                                };
-                                const rs = roleStyle[member.role] ?? roleStyle.member;
-                                return (
-                                    <div
-                                        key={member.id}
-                                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "var(--color-surface-container-lowest)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)" }}
-                                    >
-                                        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                                            <Avatar src={member.avatarUrl} name={member.name} size="sm" />
-                                            <div>
-                                                <p style={{ fontSize: 14, fontWeight: 500, color: "var(--color-on-surface)" }}>{member.name}</p>
-                                                <p style={{ fontSize: 12, color: "var(--color-on-surface-variant)" }}>{member.email}</p>
+                        {/* Members list */}
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                            {isLoading ? (
+                                <><SkeletonRow /><SkeletonRow /><SkeletonRow /></>
+                            ) : (
+                                members.map((member) => {
+                                    const roleStyle: Record<string, { bg: string; color: string }> = {
+                                        owner: { bg: "#dbe1ff", color: "#00174b" },
+                                        admin: { bg: "#e1e0ff", color: "#07006c" },
+                                        member: { bg: "#eaedff", color: "#434655" },
+                                    };
+                                    const rs = roleStyle[member.role] ?? roleStyle.member;
+                                    return (
+                                        <div
+                                            key={member.userId}
+                                            style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px", background: "var(--color-surface-container-lowest)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)" }}
+                                        >
+                                            <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                                                <Avatar src={member.avatarUrl} name={member.name} size="sm" />
+                                                <div>
+                                                    <p style={{ fontSize: 14, fontWeight: 500, color: "var(--color-on-surface)" }}>{member.name}</p>
+                                                    <p style={{ fontSize: 12, color: "var(--color-on-surface-variant)" }}>{member.email}</p>
+                                                </div>
+                                            </div>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                                <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 9999, background: rs.bg, color: rs.color }}>
+                                                    {member.role}
+                                                </span>
+                                                {isOwnerOrAdmin && member.role !== "owner" && (
+                                                    <button
+                                                        onClick={() => handleRemoveMember(member.id)}
+                                                        style={{ fontSize: 12, color: "var(--color-error)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: "var(--radius-sm)" }}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                )}
                                             </div>
                                         </div>
-                                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                            <span style={{ fontSize: 11, fontWeight: 600, padding: "3px 10px", borderRadius: 9999, background: rs.bg, color: rs.color }}>
-                                                {member.role}
-                                            </span>
-                                            {isOwnerOrAdmin && member.role !== "owner" && (
-                                                <button
-                                                    onClick={() => handleRemoveMember(member.id)}
-                                                    style={{ fontSize: 12, color: "var(--color-error)", background: "none", border: "none", cursor: "pointer", padding: "4px 8px", borderRadius: "var(--radius-sm)" }}
-                                                >
-                                                    Remove
-                                                </button>
-                                            )}
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                </div>
-            )}
-
-            {/* Settings tab */}
-            {activeTab === "settings" && (
-                <div style={{ maxWidth: 480 }}>
-                    <div style={{ background: "var(--color-surface-container-lowest)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)", padding: "20px" }}>
-                        <p style={{ fontSize: 16, fontWeight: 600, color: "var(--color-on-surface)", marginBottom: 16 }}>Workspace settings</p>
-                        <Input label="Workspace name" defaultValue={workspace?.name} />
-                        <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-outline-variant)" }}>
-                            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--color-error)", marginBottom: 8 }}>Danger zone</p>
-                            <p style={{ fontSize: 13, color: "var(--color-on-surface-variant)", marginBottom: 12 }}>
-                                Deleting a workspace is permanent and cannot be undone.
-                            </p>
-                            <button style={{ fontSize: 13, fontWeight: 500, padding: "8px 16px", borderRadius: "var(--radius-full)", border: "1px solid var(--color-error)", color: "var(--color-error)", background: "transparent", cursor: "pointer" }}>
-                                Delete workspace
-                            </button>
+                                    );
+                                })
+                            )}
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
+
+            {/* Settings tab */}
+            {
+                activeTab === "settings" && (
+                    <div style={{ maxWidth: 480 }}>
+                        <div style={{ background: "var(--color-surface-container-lowest)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)", padding: "20px" }}>
+                            <p style={{ fontSize: 16, fontWeight: 600, color: "var(--color-on-surface)", marginBottom: 16 }}>Workspace settings</p>
+                            <Input label="Workspace name" defaultValue={workspace?.name} />
+                            <div style={{ marginTop: 16, paddingTop: 16, borderTop: "1px solid var(--color-outline-variant)" }}>
+                                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--color-error)", marginBottom: 8 }}>Danger zone</p>
+                                <p style={{ fontSize: 13, color: "var(--color-on-surface-variant)", marginBottom: 12 }}>
+                                    Deleting a workspace is permanent and cannot be undone.
+                                </p>
+                                <button style={{ fontSize: 13, fontWeight: 500, padding: "8px 16px", borderRadius: "var(--radius-full)", border: "1px solid var(--color-error)", color: "var(--color-error)", background: "transparent", cursor: "pointer" }}>
+                                    Delete workspace
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
 
             {/* Create project modal */}
             <CreateProjectModal
@@ -314,7 +319,7 @@ export default function WorkspaceDetailPage() {
                     setIsCreateProjectOpen(false);
                 }}
             />
-        </div>
+        </div >
     );
 }
 
