@@ -8,8 +8,8 @@ Do not include explanations.
 `;
 
 export const buildTaskPrompt = (
-    goal: string,
-    today: string,
+  goal: string,
+  today: string,
 ): string => `
 Break down this project goal into 8-12 developer tasks.
 
@@ -26,6 +26,7 @@ Return exactly this JSON:
     {
       "title": "Short, actionable task title",
       "description": "1-2 sentence description",
+      "task_label":"frontend",
       "priority": "high",
       "due_date": "YYYY-MM-DD"
     }
@@ -42,4 +43,5 @@ Rules:
 - Every due_date must be today or later.
 - Return dates in YYYY-MM-DD format only.
 - Each task should take 1-2 days.
+- Set "task_label" based on the primary implementation area of the task.
 `;

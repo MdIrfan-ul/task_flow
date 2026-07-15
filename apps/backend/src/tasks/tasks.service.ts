@@ -39,6 +39,7 @@ export class TasksService {
             priority: task.priority,
             order: task.order,
             dueDate: task.due_date,
+            task_label: task.task_label,
             projectId: task.project_id,
             commentCount,
             assignee: task.assignee
@@ -89,6 +90,7 @@ export class TasksService {
             priority?: TaskPriority;
             assigneeId?: number;
             dueDate?: string;
+            task_label?: string;
         },
     ) {
         await this.requireProjectAccess(projectId, userId);
@@ -100,6 +102,7 @@ export class TasksService {
             priority: data.priority ?? TaskPriority.MEDIUM,
             assignee_id: data.assigneeId ?? null,
             due_date: data.dueDate ?? null,
+            task_label: data?.task_label ?? null,
             project_id: projectId,
             created_by: userId,
         });
@@ -116,6 +119,7 @@ export class TasksService {
             priority?: TaskPriority;
             assigneeId?: number | null;
             dueDate?: string | null;
+            task_label?: string
         },
     ) {
         const task = await this.taskRepo.findByPk(taskId, {
@@ -129,6 +133,7 @@ export class TasksService {
             ...(data.description !== undefined && { description: data.description }),
             ...(data.priority !== undefined && { priority: data.priority }),
             ...(data.assigneeId !== undefined && { assignee_id: data.assigneeId }),
+            ...(data.task_label !== undefined && { task_label: data.task_label }),
             ...(data.dueDate !== undefined && { due_date: data.dueDate }),
         });
 

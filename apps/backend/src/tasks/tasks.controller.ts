@@ -62,7 +62,6 @@ export class TasksController {
       dueDate?: string;
     },
   ) {
-    console.log(body)
     return this.tasksService.create(projectId, req.user.userId, body);
   }
 

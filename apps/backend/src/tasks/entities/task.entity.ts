@@ -78,6 +78,9 @@ export class Task extends Model {
     @HasMany(() => Comment)
     declare comments: Comment[];
 
+    @Column({ type: DataType.STRING, allowNull: true })
+    declare task_label: string;
+
     @CreatedAt declare created_at: Date;
     @UpdatedAt declare updated_at: Date;
     @DeletedAt declare deleted_at: Date;
