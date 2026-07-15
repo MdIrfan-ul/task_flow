@@ -83,18 +83,16 @@ export default function KanbanBoard({
         const activeId = active.id;
         const overId = over.id;
 
-        setLocalTasks((prev) => {
-            const activeIndex = prev.findIndex((t) => t.id === activeId);
-            const overIndex = prev.findIndex((t) => t.id === overId);
+        const activeIndex = localTasks.findIndex((t) => t.id === activeId);
+        const overIndex = localTasks.findIndex((t) => t.id === overId);
 
-            let updated = prev;
-            if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
-                updated = arrayMove(prev, activeIndex, overIndex);
-            }
+        let updated = localTasks;
+        if (activeIndex !== -1 && overIndex !== -1 && activeIndex !== overIndex) {
+            updated = arrayMove(localTasks, activeIndex, overIndex);
+        }
 
-            onTasksChange?.(updated);
-            return updated;
-        });
+        setLocalTasks(updated);
+        onTasksChange?.(updated);
     }
 
     return (

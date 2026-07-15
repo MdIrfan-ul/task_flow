@@ -64,6 +64,9 @@ export default function ProjectBoardPage() {
         fetchData();
         return () => { cancelled = true; };
     }, [projectId, showToast]);
+    useEffect(() => {
+        setTasks(tasks);
+    }, [tasks]);
 
     const handleTasksChange = async (updatedTasks: Task[]) => {
         const statusChanges = updatedTasks.filter((updated) => {
