@@ -55,6 +55,15 @@ export class AuthController {
       email: user.email,
       role: user.user_type,
     });
+
+    const ENV = this.configService.get<string>('ENVIRONMENT');
+    res.cookie('refresh_token', tokens.refreshToken, {
+      httpOnly: true,
+      secure: ENV === 'PRODUCTION',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
     // Redirect to frontend with access token
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
     res.redirect(`${frontendUrl}/auth/callback?token=${tokens.accessToken}`);

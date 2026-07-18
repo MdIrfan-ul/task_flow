@@ -12,7 +12,7 @@ import {
 interface UseWorkspaceResult {
     workspace: Workspace | null;
     members: WorkspaceMember[];
-    // pendingInvites: PendingInvite[];
+    pendingInvites: PendingInvite[];
     isLoading: boolean;
     error: string | null;
     isOwner: boolean;
@@ -37,7 +37,7 @@ interface UseWorkspaceResult {
 export function useWorkspace(workspaceId: string | undefined): UseWorkspaceResult {
     const [workspace, setWorkspace] = useState<Workspace | null>(null);
     const [members, setMembers] = useState<WorkspaceMember[]>([]);
-    // const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
+    const [pendingInvites, setPendingInvites] = useState<PendingInvite[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -75,7 +75,7 @@ export function useWorkspace(workspaceId: string | undefined): UseWorkspaceResul
                 `/workspaces/${workspaceId}/invite`,
                 { email, role }
             );
-            // setPendingInvites((prev) => [...prev, invite]);
+            setPendingInvites((prev) => [...prev, invite]);
         },
         [workspaceId]
     );
@@ -107,7 +107,7 @@ export function useWorkspace(workspaceId: string | undefined): UseWorkspaceResul
         async (inviteId: string) => {
             if (!workspaceId) return;
             await apiDelete(`/workspaces/${workspaceId}/invites/${inviteId}`);
-            // setPendingInvites((prev) => prev.filter((i) => i.id !== inviteId));
+            setPendingInvites((prev) => prev.filter((i) => i.id !== inviteId));
         },
         [workspaceId]
     );
@@ -115,7 +115,7 @@ export function useWorkspace(workspaceId: string | undefined): UseWorkspaceResul
     return {
         workspace,
         members,
-        // pendingInvites,
+        pendingInvites,
         isLoading,
         error,
         isOwner: workspace?.myRole === "owner",

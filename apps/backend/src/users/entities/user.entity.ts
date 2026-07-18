@@ -22,7 +22,7 @@ export class User extends Model {
     @Column({ type: DataType.STRING, allowNull: false, unique: true })
     declare email: string;
 
-    @Column({ type: DataType.STRING, allowNull: false })
+    @Column({ type: DataType.STRING, allowNull: true })
     declare password: string;
 
     @Column({ type: DataType.STRING, allowNull: true })
@@ -45,11 +45,15 @@ export class User extends Model {
 
     @BeforeCreate
     static async hashPasswordHook(instance: User) {
+        const plainPassword = instance.getDataValue('password');
+
+        if (!plainPassword) {
+            return;
+        }
 
         if (instance.changed('password')) {
-            const plainPassword = instance.getDataValue('password')
-            const hashed = await hashPassword(plainPassword)
-            instance.setDataValue('password', hashed)
+            const hashed = await hashPassword(plainPassword);
+            instance.setDataValue('password', hashed);
         }
     }
 }

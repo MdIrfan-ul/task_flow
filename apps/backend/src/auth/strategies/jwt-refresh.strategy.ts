@@ -6,7 +6,7 @@ import { Request } from "express"
 import { UserType } from "src/users/enums/user-enum"
 
 interface JwtPayload {
-    userId: string
+    userId: number
     email: string
     role: UserType
 }

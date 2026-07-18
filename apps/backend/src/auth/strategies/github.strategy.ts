@@ -2,10 +2,13 @@ import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { PassportStrategy } from "@nestjs/passport";
 import { Strategy, StrategyOptions } from "passport-github2";
+import { AuthService } from "../auth.service";
 
 @Injectable()
 export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
-    constructor(configService: ConfigService) {
+    constructor(configService: ConfigService,
+        private readonly authService: AuthService
+    ) {
         super({
             clientID: configService.get<string>('GITHUB_CLIENT_ID'),
             clientSecret: configService.get<string>('GITHUB_CLIENT_SECRET'),
@@ -20,14 +23,10 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
         done: (err: any, user: any) => void,
     ) {
         const { username, displayName, photos, emails } = profile;
-        const user = {
-            email: emails?.[0]?.value ?? null,
-            username,
-            displayName,
-            picture: photos?.[0]?.value ?? null,
-            accessToken,
-            refreshToken,
-        };
-        done(null, user);
+        return this.authService.findOrCreateOAuthUser({
+            email: emails?.[0]?.value,
+            name: displayName || username,
+            picture: photos?.[0]?.value
+        });
     }
 }

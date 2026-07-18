@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { UserType } from 'src/users/enums/user-enum';
 
 export interface TokenPayload {
-    userId: string,
+    userId: number,
     email: string,
     role: string
 }
@@ -100,6 +100,26 @@ export class AuthService {
         });
         return create;
 
+    }
+    async findOrCreateOAuthUser(data: {
+        email: string;
+        name: string;
+        picture?: string;
+    }) {
+        let user = await this.userRepo.findOne({
+            where: { email: data.email },
+        });
+
+
+        user ??= await this.userRepo.create({
+            email: data.email,
+            name: data.name,
+            profile: data.picture,
+            password: null,
+            user_type: UserType.OWNER,
+        });
+
+        return user;
     }
 
 }

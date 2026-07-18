@@ -5,7 +5,7 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { UserType } from "src/users/enums/user-enum";
 
 interface JwtPayload {
-    userId: string;
+    userId: number;
     email: string;
     role: UserType;
 }
