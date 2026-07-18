@@ -10,7 +10,7 @@ import { ConfigService } from '@nestjs/config';
 import { UserType } from 'src/users/enums/user-enum';
 
 export interface TokenPayload {
-    userId: number,
+    userId: string,
     email: string,
     role: string
 }
@@ -51,6 +51,24 @@ export class AuthService {
         return { accessToken, refreshToken }
     }
 
+    private toPublicUser(user: User) {
+        return {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            role: user.user_type,
+            avatarUrl: user.profile ?? null,
+        };
+    }
+
+    async getPublicUserById(userId: number) {
+        const user = await this.userRepo.findByPk(userId);
+        if (!user) {
+            throw new UnauthorizedException('User not found');
+        }
+        return this.toPublicUser(user);
+    }
+
     async login(loginInput: LoginDto) {
         const { email, password } = loginInput;
 
@@ -68,13 +86,7 @@ export class AuthService {
 
         return {
             ...tokens,
-            user: {
-                userId: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.user_type,
-                avatarUrl: user.profile ?? null,
-            }
+            user: this.toPublicUser(user as unknown as User),
         }
 
     }

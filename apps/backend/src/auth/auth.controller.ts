@@ -66,7 +66,7 @@ export class AuthController {
 
     // Redirect to frontend with access token
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
-    res.redirect(`${frontendUrl}/auth/callback?token=${tokens.accessToken}`);
+    res.redirect(`${frontendUrl}/callback?token=${tokens.accessToken}`);
   }
 
   @Get('google/callback')
@@ -98,6 +98,7 @@ export class AuthController {
 
     // Rotate the refresh token cookie
     const ENV = this.configService.get<string>('ENVIRONMENT');
+    const publicUser = await this.authService.getPublicUserById(Number(user.userId));
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
       secure: ENV === 'PRODUCTION',
@@ -105,7 +106,7 @@ export class AuthController {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    return { accessToken: tokens.accessToken };
+    return { accessToken: tokens.accessToken, user: publicUser };
   }
 
   @Post('members')

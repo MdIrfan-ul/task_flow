@@ -43,6 +43,7 @@ interface AuthContextValue {
     register: (payload: RegisterPayload) => Promise<void>;
     logout: () => Promise<void>;
     loginWithOAuth: (provider: "google" | "github") => void;
+    refreshSession: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -64,30 +65,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // The access token lives in memory and is wiped on every full page
     // reload. If the user still has a valid httpOnly refresh cookie, this
     // exchanges it for a fresh access token without showing a login screen.
+    // Also reused by the OAuth callback page: after a Google/GitHub login,
+    // the refresh_token cookie is already set by the backend redirect, so
+    // calling this hydrates `user` without a second round trip through a
+    // dedicated /auth/me endpoint.
+    const refreshSession = useCallback(async () => {
+        try {
+            // restoreSession — interceptor already unwraps, so data IS AuthResponse directly
+            const { data } = await api.post<AuthResponse>("/auth/refresh");
+            setAccessToken(data.accessToken);
+            setUser(data.user);
+        } catch {
+            setAccessToken(null);
+            setUser(null);
+            throw new Error("Session refresh failed");
+        }
+    }, []);
+
     useEffect(() => {
         let isMounted = true;
 
-        // restoreSession — interceptor already unwraps, so data IS AuthResponse directly
-        async function restoreSession() {
-            try {
-                const { data } = await api.post<AuthResponse>("/auth/refresh");
-                if (!isMounted) return;
-                setAccessToken(data.accessToken);
-                setUser(data.user);
-            } catch {
-                if (!isMounted) return;
-                setAccessToken(null);
-                setUser(null);
-            } finally {
+        refreshSession()
+            .catch(() => {
+                // Already cleared inside refreshSession; nothing else to do.
+            })
+            .finally(() => {
                 if (isMounted) setIsLoading(false);
-            }
-        }
-
-        restoreSession();
+            });
 
         return () => {
             isMounted = false;
         };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // ─── Wire up the 401-refresh-failed handler from lib/api.ts ─────────
@@ -147,6 +156,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 register,
                 logout,
                 loginWithOAuth,
+                refreshSession,
             }}
         >
             {children}

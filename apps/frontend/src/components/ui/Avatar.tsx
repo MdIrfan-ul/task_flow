@@ -40,11 +40,18 @@ function getColorFromName(name: string): string {
 export default function Avatar({ src, name, size = "md", online }: AvatarProps) {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     const isValidSrc = typeof src === "string" && src.trim().length > 0;
+    // Locally-uploaded avatars are stored as relative paths (e.g.
+    // "images/abc.png") and need the API origin prepended. OAuth avatars
+    // (Google/GitHub) are already-absolute CDN URLs — prepending apiUrl to
+    // those produces a malformed, unloadable URL like
+    // "http://localhost:8000/https://lh3.googleusercontent.com/...".
+    const isAbsoluteUrl = isValidSrc && /^https?:\/\//i.test(src as string);
+    const resolvedSrc = isAbsoluteUrl ? (src as string) : `${apiUrl}/${src}`;
     return (
         <div className="relative inline-block flex-shrink-0">
             {isValidSrc ? (
                 <Image
-                    src={`${apiUrl}/${src}` as string}
+                    src={resolvedSrc}
                     alt={name}
                     width={56}
                     height={56}

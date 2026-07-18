@@ -14,6 +14,14 @@ const nextConfig: NextConfig = {
         port: "8000",
         pathname: "/images/**",
       },
+      {
+        protocol: "https",
+        hostname: "lh3.googleusercontent.com",
+      },
+      {
+        protocol: "https",
+        hostname: "avatars.githubusercontent.com",
+      },
     ],
   },
 };
