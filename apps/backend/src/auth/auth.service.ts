@@ -134,4 +134,8 @@ export class AuthService {
         return user;
     }
 
+    // async logout(userId: number) {
+    //     await this.userRepo.update()
+    // }
+
 }

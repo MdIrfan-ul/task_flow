@@ -122,4 +122,24 @@ export class AuthController {
       req.user.userId,
     );
   }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(
+    @Req() req: AuthRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // await this.authService.logout(req.user.userId);
+
+    res.clearCookie('refresh_token', {
+      httpOnly: true,
+      secure: this.configService.get('ENVIRONMENT') === 'PRODUCTION',
+      sameSite: 'lax',
+    });
+
+    return {
+      message: 'Logged out successfully',
+    };
+  }
+
 }
