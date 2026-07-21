@@ -7,6 +7,7 @@ import { useToast } from "@/components/ui/Toast";
 import { Input } from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import Avatar from "@/components/ui/Avatar";
+import ProfileTab from "@/components/settings/ProfileTab";
 
 type Tab = "profile" | "workspace" | "members" | "security" | "integrations" | "billing";
 
@@ -82,7 +83,7 @@ export default function SettingsPage() {
             </div>
 
             {/* Tab content */}
-            {activeTab === "profile" && <ProfileTab user={user} showToast={showToast} />}
+            {activeTab === "profile" && <ProfileTab />}
             {activeTab === "security" && <SecurityTab showToast={showToast} logout={logout} />}
             {activeTab === "workspace" && <WorkspaceTab />}
             {activeTab === "members" && <MembersTab />}
@@ -92,63 +93,6 @@ export default function SettingsPage() {
     );
 }
 
-// ─── Profile Tab ─────────────────────────────────────────────────────────────
-
-function ProfileTab({ user, showToast }: { user: any; showToast: any }) {
-    const [name, setName] = useState(user?.name ?? "");
-    const [isSaving, setIsSaving] = useState(false);
-
-    const handleSave = async () => {
-        setIsSaving(true);
-        try {
-            await apiPatch(`/users/${user?.id}`, { name });
-            showToast("Profile updated", "success");
-        } catch {
-            showToast("Failed to update profile", "error");
-        } finally {
-            setIsSaving(false);
-        }
-    };
-
-    return (
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, alignItems: "start" }}>
-            <div style={{ background: "var(--color-surface-container-lowest)", border: "1px solid var(--color-outline-variant)", borderRadius: "var(--radius-md)", padding: "24px", display: "flex", flexDirection: "column", gap: 20 }}>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--color-on-surface)" }}>Personal Information</h2>
-
-                {/* Avatar upload */}
-                <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                    <Avatar src={user?.avatarUrl} name={user?.name ?? ""} size="lg" />
-                    <div>
-                        <p style={{ fontSize: 13, fontWeight: 500, color: "var(--color-on-surface)", marginBottom: 4 }}>Profile photo</p>
-                        <p style={{ fontSize: 12, color: "var(--color-on-surface-variant)", marginBottom: 8 }}>PNG or JPG, max 3MB</p>
-                        <label style={{ fontSize: 12, fontWeight: 500, color: "var(--color-primary)", cursor: "pointer", padding: "6px 12px", border: "1px solid var(--color-primary)", borderRadius: "var(--radius-full)" }}>
-                            Change photo
-                            <input type="file" accept="image/*" style={{ display: "none" }} />
-                        </label>
-                    </div>
-                </div>
-
-                <Input label="Full name" value={name} onChange={(e) => setName(e.target.value)} />
-                <Input label="Email" value={user?.email ?? ""} disabled hint="Contact support to change your email" />
-
-                <Button variant="primary" onClick={handleSave} isLoading={isSaving}>
-                    Save changes
-                </Button>
-            </div>
-
-            {/* Danger zone */}
-            <div style={{ background: "var(--color-surface-container-lowest)", border: "1px solid var(--color-error-container)", borderRadius: "var(--radius-md)", padding: "24px" }}>
-                <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--color-error)", marginBottom: 8 }}>Danger Zone</h2>
-                <p style={{ fontSize: 13, color: "var(--color-on-surface-variant)", marginBottom: 16 }}>
-                    Once you delete your account, there is no going back. All your data will be permanently removed.
-                </p>
-                <button style={{ fontSize: 13, fontWeight: 500, padding: "8px 16px", borderRadius: "var(--radius-full)", border: "1px solid var(--color-error)", color: "var(--color-error)", background: "transparent", cursor: "pointer" }}>
-                    Delete account
-                </button>
-            </div>
-        </div>
-    );
-}
 
 // ─── Security Tab ─────────────────────────────────────────────────────────────
 

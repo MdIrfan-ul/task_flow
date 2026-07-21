@@ -45,19 +45,13 @@ export default function Avatar({ src, name, size = "md", online }: AvatarProps) 
     // (Google/GitHub) are already-absolute CDN URLs — prepending apiUrl to
     // those produces a malformed, unloadable URL like
     // "http://localhost:8000/https://lh3.googleusercontent.com/...".
+
+    const isBlobUrl = isValidSrc && (src as string).startsWith("blob:");
     const isAbsoluteUrl = isValidSrc && /^https?:\/\//i.test(src as string);
-    const resolvedSrc = isAbsoluteUrl ? (src as string) : `${apiUrl}/${src}`;
-    return (
-        <div className="relative inline-block flex-shrink-0">
-            {isValidSrc ? (
-                <Image
-                    src={resolvedSrc}
-                    alt={name}
-                    width={56}
-                    height={56}
-                    className={`${sizeClasses[size]} rounded-full object-cover`}
-                />
-            ) : (
+    const resolvedSrc = isBlobUrl || isAbsoluteUrl ? (src as string) : `${apiUrl}/${src}`;
+    const avatarElement = (() => {
+        if (!isValidSrc) {
+            return (
                 <div
                     className={`${sizeClasses[size]} ${getColorFromName(
                         name
@@ -65,7 +59,33 @@ export default function Avatar({ src, name, size = "md", online }: AvatarProps) 
                 >
                     {getInitials(name)}
                 </div>
-            )}
+            );
+        }
+
+        if (isBlobUrl || isAbsoluteUrl) {
+            return (
+                <img
+                    src={resolvedSrc}
+                    alt={name}
+                    className={`${sizeClasses[size]} rounded-full object-cover`}
+                />
+            );
+        }
+
+        return (
+            <Image
+                src={resolvedSrc}
+                alt={name}
+                width={56}
+                height={56}
+                className={`${sizeClasses[size]} rounded-full object-cover`}
+            />
+        );
+    })();
+
+    return (
+        <div className="relative inline-block flex-shrink-0">
+            {avatarElement}
             {online !== undefined && (
                 <span
                     className={`absolute bottom-0 right-0 ${dotSizeClasses[size]} rounded-full border-2 border-surface-container-lowest ${online ? "bg-secondary" : "bg-outline-variant"

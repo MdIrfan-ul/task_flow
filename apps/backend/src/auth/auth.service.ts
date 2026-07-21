@@ -107,7 +107,7 @@ export class AuthService {
             device_name: deviceInfo.device_name,
             browser: deviceInfo.browser,
             os: deviceInfo.os,
-            last_active_at: new Date(),
+            last_active_at: new Date().toLocaleString(),
             expires_at: this.getRefreshExpiryDate(),
         });
     }

@@ -3,7 +3,8 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { storage } from 'src/utils/image-storage.util';
+import { removeFile, storage } from 'src/utils/image-storage.util';
+import { join } from 'path';
 
 @Controller('users')
 export class UsersController {
@@ -14,21 +15,33 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Post(':id/profile')
+  @Patch(':id/profile')
   @UseInterceptors(FileInterceptor('file', storage('images/profile')))
   async uploadProfile(
     @Param('id', ParseIntPipe) id: number,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file?: Express.Multer.File,
+    @Body() body?: { name?: string; email?: string },
   ) {
-    if (!file) {
-      throw new BadRequestException('No file was uploaded.');
-    }
-    // Save file path to user profile in DB
-    const filePath = `images/profile/${file.filename}`;
-    console.log({ filePath })
-    await this.usersService.updateProfile(id, filePath);
+    const updatePayload = {
+      profile: file ? `images/profile/${file.filename}` : undefined,
+      name: body?.name,
+      email: body?.email,
+    };
 
-    return { filename: file.filename, path: filePath, size: file.size };
+    try {
+      const user = await this.usersService.updateProfile(id, updatePayload);
+
+      return {
+        message: 'Profile updated successfully.',
+        user,
+      };
+    } catch (error) {
+      // Remove newly uploaded file if DB update fails
+      if (file) {
+        removeFile(join(process.cwd(), 'images/profile', file.filename));
+      }
+      throw error;
+    }
   }
 
   @Get()
