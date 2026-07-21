@@ -25,3 +25,8 @@ export interface PendingInvite {
     role: WorkspaceRole;
     invitedAt: string;
 }
+
+export interface WorkspaceStats {
+    active_member: number;
+    active_projects: number;
+}

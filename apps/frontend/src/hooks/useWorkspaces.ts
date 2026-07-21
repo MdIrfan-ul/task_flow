@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { apiGet, apiPost } from "../lib/api";
-import { Workspace } from "../types/workspace";
+import { Workspace, WorkspaceStats } from "../types/workspace";
 
 interface CreateWorkspacePayload {
     name: string;
@@ -14,6 +14,7 @@ interface UseWorkspacesResult {
     error: string | null;
     createWorkspace: (payload: CreateWorkspacePayload) => Promise<Workspace>;
     refetch: () => Promise<void>;
+    workspaceStats: WorkspaceStats | undefined;
 }
 
 /**
@@ -26,6 +27,7 @@ interface UseWorkspacesResult {
  */
 export function useWorkspaces(): UseWorkspacesResult {
     const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+    const [workspaceStats, setWorkspaceStats] = useState<WorkspaceStats | undefined>(undefined);
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
@@ -42,9 +44,22 @@ export function useWorkspaces(): UseWorkspacesResult {
         }
     }, []);
 
-    useEffect(() => {
-        fetchWorkspaces();
-    }, [fetchWorkspaces]);
+    const fetchStats = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const data = await apiGet<WorkspaceStats>("/workspaces/stats");
+            console.log("stats response:", data);
+            setWorkspaceStats(data);
+
+        } catch {
+            setError("Couldn't load your workspaces. Try refreshing.");
+
+        } finally {
+            setIsLoading(false);
+
+        }
+    }, [])
 
     const createWorkspace = useCallback(
         async (payload: CreateWorkspacePayload) => {
@@ -55,11 +70,24 @@ export function useWorkspaces(): UseWorkspacesResult {
         []
     );
 
+    const refetch = useCallback(async () => {
+        await Promise.all([
+            fetchWorkspaces(),
+            fetchStats(),
+        ]);
+    }, [fetchWorkspaces, fetchStats]);
+
+
+    useEffect(() => {
+        refetch();
+    }, [refetch]);
+
     return {
         workspaces,
         isLoading,
         error,
         createWorkspace,
-        refetch: fetchWorkspaces,
+        workspaceStats,
+        refetch
     };
 }

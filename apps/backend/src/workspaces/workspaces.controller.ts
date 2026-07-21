@@ -41,6 +41,14 @@ export class WorkspacesController {
     return this.workspacesService.findAllByUser(req.user.userId);
   }
 
+  @Roles(UserType.OWNER, UserType.MEMBER)
+  @Get('stats')
+  workspaceStats(
+    @Req() req: AuthRequest,
+  ) {
+    return this.workspacesService.getWorkspaceStats(req.user.userId);
+  }
+
   // GET /workspaces/:id
   @Roles(UserType.OWNER, UserType.MEMBER)
   @Get(':id')

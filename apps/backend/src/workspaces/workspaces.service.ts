@@ -14,6 +14,7 @@ export class WorkspacesService {
     constructor(
         @InjectModel(Workspace) private readonly workspaceRepo: typeof Workspace,
         @InjectModel(WorkspaceMember) private readonly memberRepo: typeof WorkspaceMember,
+        @InjectModel(Project) private readonly projectRepo: typeof Project,
     ) { }
 
     async create(userId: number, name: string) {
@@ -166,5 +167,16 @@ export class WorkspacesService {
         if (m.role !== WorkspaceRole.OWNER) {
             throw new ForbiddenException('Owner access required');
         }
+    }
+
+    async getWorkspaceStats(userId: number) {
+        const getAllWorkspaceMembers = await this.memberRepo.findAll({ where: { user_id: userId } });
+        const workspaceId = getAllWorkspaceMembers?.map((item) => item?.workspace_id);
+        const [active_member, active_projects] = await Promise.all([
+            this.memberRepo.count({ where: { workspace_id: workspaceId, role: WorkspaceRole.MEMBER } }),
+            this.projectRepo.count({ where: { workspace_id: workspaceId } })
+        ])
+        const result = { active_member, active_projects };
+        return result;
     }
 }

@@ -8,7 +8,7 @@ import Avatar from "@/components/ui/Avatar";
 
 export default function WorkspacesPage() {
     const router = useRouter();
-    const { workspaces, isLoading, refetch } = useWorkspaces();
+    const { workspaces, workspaceStats, isLoading, refetch } = useWorkspaces();
     const [isCreateOpen, setIsCreateOpen] = useState(false);
 
     const roleStyle: Record<string, { bg: string; color: string }> = {
@@ -18,8 +18,9 @@ export default function WorkspacesPage() {
     };
 
     // Compute stats from workspaces
-    const totalMembers = 124; // placeholder — replace with real API data
-    const activeProjects = 42;
+    console.log(workspaceStats);
+    const totalMembers = workspaceStats?.active_member ?? 0; // placeholder — replace with real API data
+    const activeProjects = workspaceStats?.active_projects ?? 0;
     const storageUsed = 82;
 
     return (
