@@ -11,6 +11,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { UserType } from 'src/users/enums/user-enum';
 import { JwtAuthGuard } from './guards';
+import { parseDeviceInfo } from 'src/utils/device-util';
 interface AuthRequest extends Request {
   user: { userId: number; email: string; role: string };
 }
@@ -36,12 +37,18 @@ export class AuthController {
     @Body() loginInput: LoginDto
   ) {
     const tokens = await this.authService.login(loginInput);
+
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
+    await this.authService.createLoginSession(
+      Number(tokens.user.id),
+      tokens.refreshToken,
+      parseDeviceInfo(req),
+    );
     return { accessToken: tokens.accessToken, user: tokens.user };
   }
 
@@ -64,6 +71,11 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
     });
+    await this.authService.createLoginSession(
+      user.id,
+      tokens.refreshToken,
+      parseDeviceInfo(req),
+    );
 
     // Redirect to frontend with access token
     const frontendUrl = this.configService.get<string>('FRONTEND_URL');
@@ -91,6 +103,8 @@ export class AuthController {
   async refreshAuth(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const user = req.user as TokenPayload;
 
+    const oldRefreshToken = req.cookies?.refresh_token as string | undefined;
+
     const tokens = await this.authService.generateTokens({
       userId: user.userId,
       email: user.email,
@@ -99,6 +113,8 @@ export class AuthController {
 
     // Rotate the refresh token cookie
     const ENV = this.configService.get<string>('ENVIRONMENT');
+
+    await this.authService.rotateSession(oldRefreshToken, tokens.refreshToken, parseDeviceInfo(req));
     const publicUser = await this.authService.getPublicUserById(Number(user.userId));
     res.cookie('refresh_token', tokens.refreshToken, {
       httpOnly: true,
@@ -130,6 +146,7 @@ export class AuthController {
     @Req() req: AuthRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
+    await this.authService.endSession(req.cookies?.refresh_token as string | undefined);
     // await this.authService.logout(req.user.userId);
 
     res.clearCookie('refresh_token', {
