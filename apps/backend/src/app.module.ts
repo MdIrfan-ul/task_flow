@@ -13,6 +13,7 @@ import { WorkspacesModule } from './workspaces/workspaces.module';
 import { ProjectsModule } from './projects/projects.module';
 import { TasksModule } from './tasks/tasks.module';
 import { AiModule } from './ai/ai.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -28,7 +29,8 @@ import { AiModule } from './ai/ai.module';
     WorkspacesModule,
     ProjectsModule,
     TasksModule,
-    AiModule
+    AiModule,
+    DashboardModule
   ],
   controllers: [AppController],
   providers: [AppService,

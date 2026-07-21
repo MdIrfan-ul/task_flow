@@ -2,6 +2,8 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { SkeletonCard } from "@/components/ui/Skeleton";
+import StatsCards from "@/components/dashboard/StatsCards";
+import ActivityFeed from "@/components/dashboard/ActivityFeed";
 
 function getGreeting(): string {
     const hour = new Date().getHours();
@@ -34,12 +36,10 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats row — placeholder until StatsCards component is built */}
-            <div className="grid grid-cols-4 gap-4">
-                <SkeletonCard />
-                <SkeletonCard />
-                <SkeletonCard />
-                <SkeletonCard />
-            </div>
+            {/* <div className="grid grid-cols-4 gap-4">
+               
+            </div> */}
+            <StatsCards />
 
             {/* Middle row placeholder */}
             <div className="grid grid-cols-3 gap-6">
@@ -62,11 +62,8 @@ export default function DashboardPage() {
                         Task Trend — coming soon
                     </p>
                 </div>
-                <div className="h-56 bg-surface-container-lowest rounded-md border border-outline-variant/30 flex items-center justify-center">
-                    <p className="text-body-sm text-on-surface-variant">
-                        Activity Feed — coming soon
-                    </p>
-                </div>
+                <ActivityFeed />
+
             </div>
         </div>
     );

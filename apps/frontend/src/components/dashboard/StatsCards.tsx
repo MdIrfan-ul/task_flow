@@ -13,168 +13,158 @@ interface Stats {
     onlineMembers: number;
 }
 
+const DEFAULT_STATS: Stats = {
+    totalProjects: 0,
+    activeTasks: 0,
+    completedTasks: 0,
+    teamMembers: 0,
+    projectsGrowth: 0,
+    completionRate: 0,
+    onlineMembers: 0,
+};
+
 function StatCard({
     icon,
     label,
     value,
     badge,
+    badgeBg,
     badgeColor,
     trend,
+    isLoading,
 }: {
     icon: React.ReactNode;
     label: string;
-    value: number | string;
+    value: string | number;
     badge?: string;
-    badgeColor?: "success" | "info" | "warning";
+    badgeBg?: string;
+    badgeColor?: string;
     trend?: number[];
+    isLoading?: boolean;
 }) {
-    const badgeClasses = {
-        success: "bg-[#e1e0ff] text-[#07006c]",
-        info: "bg-[#dbe1ff] text-[#00174b]",
-        warning: "bg-[#f0dbff] text-[#2c0051]",
-    };
+    if (isLoading) {
+        return (
+            <div style={{
+                background: "var(--color-surface-container-lowest)",
+                border: "1px solid var(--color-outline-variant)",
+                borderRadius: "var(--radius-md)",
+                padding: "16px 20px",
+                height: 110,
+                animation: "pulse 1.5s ease-in-out infinite",
+            }} />
+        );
+    }
 
     return (
-        <div className="stat-card flex flex-col gap-3">
-            <div className="flex items-start justify-between">
-                <div
-                    style={{
-                        width: 36,
-                        height: 36,
-                        borderRadius: "var(--radius)",
-                        background: "var(--color-surface-container)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "var(--color-primary)",
-                    }}
-                >
+        <div style={{
+            background: "var(--color-surface-container-lowest)",
+            border: "1px solid var(--color-outline-variant)",
+            borderRadius: "var(--radius-md)",
+            padding: "16px 20px",
+            display: "flex",
+            flexDirection: "column",
+            gap: 10,
+        }}>
+            <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between" }}>
+                <div style={{
+                    width: 36, height: 36,
+                    borderRadius: "var(--radius)",
+                    background: "var(--color-surface-container)",
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                    color: "var(--color-primary)",
+                }}>
                     {icon}
                 </div>
                 {badge && (
-                    <span
-                        className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${badgeClasses[badgeColor ?? "info"]}`}
-                    >
+                    <span style={{
+                        fontSize: 11, fontWeight: 600,
+                        padding: "3px 8px", borderRadius: 9999,
+                        background: badgeBg ?? "var(--color-primary-fixed)",
+                        color: badgeColor ?? "var(--color-on-primary-fixed)",
+                    }}>
                         {badge}
                     </span>
                 )}
             </div>
 
             <div>
-                <p
-                    style={{
-                        fontSize: "var(--text-label-sm)",
-                        color: "var(--color-on-surface-variant)",
-                        marginBottom: 4,
-                    }}
-                >
+                <p style={{ fontSize: 11, fontWeight: 600, color: "var(--color-on-surface-variant)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: 4 }}>
                     {label}
                 </p>
-                <p
-                    style={{
-                        fontSize: 28,
-                        fontWeight: 700,
-                        color: "var(--color-on-surface)",
-                        lineHeight: 1,
-                    }}
-                >
-                    {value}
-                </p>
+                <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", gap: 8 }}>
+                    <p style={{ fontSize: 28, fontWeight: 700, color: "var(--color-on-surface)", lineHeight: 1 }}>
+                        {value}
+                    </p>
+                    {trend && (
+                        <svg width="64" height="24" viewBox="0 0 64 24" aria-hidden="true" style={{ flexShrink: 0 }}>
+                            <polyline
+                                points={trend.map((v, i) => `${(i / (trend.length - 1)) * 64},${24 - (v / Math.max(...trend)) * 20}`).join(" ")}
+                                fill="none"
+                                stroke="var(--color-primary)"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                            />
+                        </svg>
+                    )}
+                </div>
             </div>
-
-            {/* Mini sparkline */}
-            {trend && (
-                <svg width="80" height="24" viewBox="0 0 80 24" aria-hidden="true">
-                    <polyline
-                        points={trend
-                            .map((v, i) => `${(i / (trend.length - 1)) * 80},${24 - (v / Math.max(...trend)) * 20}`)
-                            .join(" ")}
-                        fill="none"
-                        stroke="var(--color-primary)"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                    />
-                </svg>
-            )}
         </div>
     );
 }
 
 export default function StatsCards() {
-    const [stats, setStats] = useState<Stats | null>(null);
+    const [stats, setStats] = useState<Stats>(DEFAULT_STATS);
     const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
-        async function fetchStats() {
-            try {
-                const data = await apiGet<Stats>("/dashboard/stats");
-                setStats(data);
-            } catch {
-                // Use placeholder data if endpoint not ready yet
-                setStats({
-                    totalProjects: 0,
-                    activeTasks: 0,
-                    completedTasks: 0,
-                    teamMembers: 0,
-                    projectsGrowth: 2,
-                    completionRate: 84,
-                    onlineMembers: 0,
-                });
-            } finally {
-                setIsLoading(false);
-            }
-        }
-        fetchStats();
+        apiGet<Stats>("/dashboard/stats")
+            .then(setStats)
+            .catch(() => setStats(DEFAULT_STATS))
+            .finally(() => setIsLoading(false));
     }, []);
 
-    if (isLoading) {
-        return (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {[1, 2, 3, 4].map((i) => (
-                    <div
-                        key={i}
-                        className="stat-card animate-pulse"
-                        style={{ height: 120 }}
-                    />
-                ))}
-            </div>
-        );
-    }
-
     return (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16 }}>
             <StatCard
+                isLoading={isLoading}
                 icon={<ProjectIcon />}
                 label="Total Projects"
-                value={stats?.totalProjects ?? 0}
-                badge={`+${stats?.projectsGrowth ?? 0} new`}
-                badgeColor="info"
-                trend={[3, 5, 4, 7, 6, 9, 8, 12]}
+                value={stats.totalProjects}
+                badge={stats.projectsGrowth > 0 ? `+${stats.projectsGrowth} new` : undefined}
+                badgeBg="var(--color-primary-fixed)"
+                badgeColor="var(--color-on-primary-fixed)"
+                trend={[3, 5, 4, 7, 6, 9, 8, stats.totalProjects || 1]}
             />
             <StatCard
+                isLoading={isLoading}
                 icon={<TaskIcon />}
                 label="Active Tasks"
-                value={stats?.activeTasks ?? 0}
+                value={stats.activeTasks}
                 badge="On track"
-                badgeColor="success"
-                trend={[10, 14, 12, 18, 15, 20, 22, 25]}
+                badgeBg="var(--color-secondary-fixed)"
+                badgeColor="var(--color-on-secondary-fixed)"
+                trend={[10, 14, 12, 18, 15, 20, 22, stats.activeTasks || 1]}
             />
             <StatCard
+                isLoading={isLoading}
                 icon={<CheckIcon />}
                 label="Completed Tasks"
-                value={stats?.completedTasks ?? 0}
-                badge={`${stats?.completionRate ?? 0}% Rate`}
-                badgeColor="warning"
-                trend={[20, 35, 28, 45, 40, 55, 60, 70]}
+                value={stats.completedTasks}
+                badge={`${stats.completionRate}% Rate`}
+                badgeBg="var(--color-tertiary-fixed)"
+                badgeColor="var(--color-on-tertiary-fixed)"
+                trend={[20, 35, 28, 45, 40, 55, 60, stats.completedTasks || 1]}
             />
             <StatCard
+                isLoading={isLoading}
                 icon={<TeamIcon />}
                 label="Team Members"
-                value={stats?.teamMembers ?? 0}
-                badge={`${stats?.onlineMembers ?? 0} Online`}
-                badgeColor="info"
-                trend={[2, 2, 3, 3, 4, 4, 5, 5]}
+                value={stats.teamMembers}
+                badge={stats.onlineMembers > 0 ? `${stats.onlineMembers} Online` : undefined}
+                badgeBg="var(--color-primary-fixed)"
+                badgeColor="var(--color-on-primary-fixed)"
+                trend={[2, 2, 3, 3, 4, 4, 5, stats.teamMembers || 1]}
             />
         </div>
     );
