@@ -28,4 +28,9 @@ export class DashboardController {
   getProjectProgress(@Req() req: AuthRequest) {
     return this.dashboardService.getProjectProgress(req.user.userId);
   }
+
+  @Get("task-completion-trend")
+  getTaskCompletionTrend(@Req() req: AuthRequest) {
+    return this.dashboardService.getTaskCompletionTrend(req.user.userId);
+  }
 }

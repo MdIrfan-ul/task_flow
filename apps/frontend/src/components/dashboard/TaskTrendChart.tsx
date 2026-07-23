@@ -1,5 +1,7 @@
 "use client";
 
+import { apiGet } from "@/lib/api";
+import { useEffect, useState } from "react";
 import {
     AreaChart,
     Area,
@@ -31,9 +33,30 @@ interface TaskTrendChartProps {
     data?: { date: string; completed: number }[];
 }
 
-export default function TaskTrendChart({
-    data = PLACEHOLDER_DATA,
-}: TaskTrendChartProps) {
+interface TrendData {
+    date: string;
+    completed: number;
+}
+
+export default function TaskTrendChart() {
+    const [data, setData] = useState<TrendData[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<TrendData[]>("/dashboard/task-completion-trend")
+            .then(setData)
+            .catch(console.error)
+            .finally(() => setLoading(false));
+    }, []);
+
+    if (loading) {
+        return (
+            <div className="stat-card flex items-center justify-center h-[220px]">
+                Loading...
+            </div>
+        );
+    }
+
     return (
         <div className="stat-card flex flex-col gap-4">
             <div>

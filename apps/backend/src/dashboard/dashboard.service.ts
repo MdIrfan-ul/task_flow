@@ -270,4 +270,62 @@ export class DashboardService {
 
         return result;
     }
+
+    async getTaskCompletionTrend(userId: number) {
+        // Get user's workspaces
+        const memberships = await this.memberRepo.findAll({
+            where: { user_id: userId },
+            attributes: ["workspace_id"],
+        });
+
+        const workspaceIds = memberships.map((m) => m.workspace_id);
+
+        if (!workspaceIds.length) return [];
+
+        const projects = await this.projectRepo.findAll({
+            where: {
+                workspace_id: {
+                    [Op.in]: workspaceIds,
+                },
+            },
+            attributes: ["id"],
+        });
+
+        const projectIds = projects.map((p) => p.id);
+
+        if (!projectIds.length) return [];
+
+        const data: Array<{ date: string; completed: number }> = [];
+
+        for (let i = 13; i >= 0; i--) {
+            const start = new Date();
+            start.setHours(0, 0, 0, 0);
+            start.setDate(start.getDate() - i);
+
+            const end = new Date(start);
+            end.setHours(23, 59, 59, 999);
+
+            const completed = await this.taskRepo.count({
+                where: {
+                    project_id: {
+                        [Op.in]: projectIds,
+                    },
+                    status: TaskStatus.DONE,
+                    updated_at: {
+                        [Op.between]: [start, end],
+                    },
+                },
+            });
+
+            data.push({
+                date: start.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                }),
+                completed,
+            });
+        }
+
+        return data;
+    }
 }
