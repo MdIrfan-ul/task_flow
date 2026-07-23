@@ -4,6 +4,9 @@ import { useAuth } from "@/context/AuthContext";
 import { SkeletonCard } from "@/components/ui/Skeleton";
 import StatsCards from "@/components/dashboard/StatsCards";
 import ActivityFeed from "@/components/dashboard/ActivityFeed";
+import TaskTrendChart from "@/components/dashboard/TaskTrendChart";
+import ProjectProgressChart from "@/components/dashboard/ProjectProgressChart";
+import AIInsightsPanel from "@/components/dashboard/AIInsightsPanel";
 
 function getGreeting(): string {
     const hour = new Date().getHours();
@@ -43,29 +46,17 @@ export default function DashboardPage() {
 
             {/* Middle row placeholder */}
             <div className="grid grid-cols-3 gap-6">
-                <div className="col-span-2 h-72 bg-surface-container-lowest rounded-md border border-outline-variant/30 flex items-center justify-center">
-                    <p className="text-body-sm text-on-surface-variant">
-                        Project Progress Chart — coming soon
-                    </p>
-                </div>
-                <div className="h-72 bg-surface-container-lowest rounded-md border border-outline-variant/30 flex items-center justify-center">
-                    <p className="text-body-sm text-on-surface-variant">
-                        AI Insights — coming soon
-                    </p>
-                </div>
+                <ProjectProgressChart />
+                <AIInsightsPanel />
             </div>
 
             {/* Bottom row placeholder */}
             <div className="grid grid-cols-2 gap-6">
-                <div className="h-56 bg-surface-container-lowest rounded-md border border-outline-variant/30 flex items-center justify-center">
-                    <p className="text-body-sm text-on-surface-variant">
-                        Task Trend — coming soon
-                    </p>
-                </div>
+                <TaskTrendChart />
                 <ActivityFeed />
 
             </div>
-        </div>
+        </div >
     );
 }
 

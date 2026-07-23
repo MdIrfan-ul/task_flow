@@ -23,4 +23,9 @@ export class DashboardController {
   getActivity(@Req() req: AuthRequest) {
     return this.dashboardService.getActivity(req.user.userId);
   }
+
+  @Get('project-progress')
+  getProjectProgress(@Req() req: AuthRequest) {
+    return this.dashboardService.getProjectProgress(req.user.userId);
+  }
 }

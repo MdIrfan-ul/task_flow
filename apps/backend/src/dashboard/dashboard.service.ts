@@ -220,4 +220,54 @@ export class DashboardService {
             .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
             .slice(0, 10);
     }
+
+    async getProjectProgress(userId: number) {
+        const memberships = await this.memberRepo.findAll({
+            where: { user_id: userId },
+            attributes: ['workspace_id'],
+        });
+
+        const workspaceIds = memberships.map((m) => m.workspace_id);
+
+        if (!workspaceIds.length) return [];
+
+        const projects = await this.projectRepo.findAll({
+            where: {
+                workspace_id: {
+                    [Op.in]: workspaceIds,
+                },
+            },
+            attributes: ['id', 'name'],
+        });
+
+        if (!projects.length) return [];
+
+        const result = await Promise.all(
+            projects.map(async (project) => {
+                const totalTasks = await this.taskRepo.count({
+                    where: {
+                        project_id: project.id,
+                    },
+                });
+
+                const completedTasks = await this.taskRepo.count({
+                    where: {
+                        project_id: project.id,
+                        status: TaskStatus.DONE,
+                    },
+                });
+
+                return {
+                    name: project.name,
+                    progress:
+                        totalTasks === 0
+                            ? 0
+                            : Math.round((completedTasks / totalTasks) * 100),
+                    planned: 100,
+                };
+            }),
+        );
+
+        return result;
+    }
 }

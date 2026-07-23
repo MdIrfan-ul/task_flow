@@ -1,36 +1,48 @@
 "use client";
 
+import { apiGet } from "@/lib/api";
+import { useEffect, useState } from "react";
 import {
+    ResponsiveContainer,
     BarChart,
-    Bar,
+    CartesianGrid,
     XAxis,
     YAxis,
-    CartesianGrid,
     Tooltip,
     Legend,
-    ResponsiveContainer,
+    Bar,
 } from "recharts";
 
-const PLACEHOLDER_DATA = [
-    { name: "Q1 Web", progress: 75, planned: 90 },
-    { name: "App V2", progress: 60, planned: 80 },
-    { name: "Brand", progress: 90, planned: 85 },
-    { name: "Sales", progress: 45, planned: 70 },
-    { name: "DevOps", progress: 80, planned: 75 },
-];
-
-interface ProjectProgressChartProps {
-    data?: { name: string; progress: number; planned: number }[];
+interface ProjectProgress {
+    name: string;
+    progress: number;
+    planned: number;
 }
 
-export default function ProjectProgressChart({
-    data = PLACEHOLDER_DATA,
-}: ProjectProgressChartProps) {
+export default function ProjectProgressChart() {
+    const [data, setData] = useState<ProjectProgress[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        apiGet<ProjectProgress[]>("/dashboard/project-progress")
+            .then(setData)
+            .catch((err) => {
+                console.error(err);
+                setData([]);
+            })
+            .finally(() => setLoading(false));
+    }, []);
+    if (loading) {
+        return (
+            <div className="stat-card flex items-center justify-center h-full">
+                Loading...
+            </div>
+        );
+    }
+
     return (
-        <div
-            className="stat-card flex flex-col gap-4"
-            style={{ height: "100%" }}
-        >
+        <div className="stat-card flex flex-col gap-4"
+            style={{ height: "100%" }}>
             <div>
                 <p
                     style={{
@@ -42,8 +54,14 @@ export default function ProjectProgressChart({
                 >
                     Project Progress Overview
                 </p>
-                <p style={{ fontSize: "var(--text-label-sm)", color: "var(--color-on-surface-variant)" }}>
-                    Real-time status across active milestones
+
+                <p
+                    style={{
+                        fontSize: "var(--text-label-sm)",
+                        color: "var(--color-on-surface-variant)",
+                    }}
+                >
+                    Completion status of active projects
                 </p>
             </div>
 
@@ -60,12 +78,15 @@ export default function ProjectProgressChart({
                         opacity={0.4}
                         vertical={false}
                     />
+
                     <XAxis
                         dataKey="name"
                         tick={{ fontSize: 11, fill: "var(--color-on-surface-variant)" }}
                         axisLine={false}
                         tickLine={false}
+
                     />
+
                     <YAxis
                         tick={{ fontSize: 11, fill: "var(--color-on-surface-variant)" }}
                         axisLine={false}
@@ -73,6 +94,7 @@ export default function ProjectProgressChart({
                         domain={[0, 100]}
                         tickFormatter={(v) => `${v}%`}
                     />
+
                     <Tooltip
                         contentStyle={{
                             background: "var(--color-surface-container-lowest)",
@@ -80,23 +102,23 @@ export default function ProjectProgressChart({
                             borderRadius: "var(--radius)",
                             fontSize: 12,
                         }}
-                        formatter={(value) => [`${value}%`]}
-                    />
-                    <Legend
-                        iconType="circle"
-                        iconSize={8}
-                        wrapperStyle={{ fontSize: 12, color: "var(--color-on-surface-variant)" }}
-                    />
+                        formatter={(value) => [`${value}%`]} />
+
+                    <Legend />
+
                     <Bar
                         dataKey="progress"
-                        name="Progress"
+                        name="Completed"
+                        stackId="progress"
                         fill="#004ac6"
                         radius={[4, 4, 0, 0]}
                     />
+
                     <Bar
                         dataKey="planned"
-                        name="Planned"
-                        fill="var(--color-surface-container-high)"
+                        name="Remaining"
+                        stackId="progress"
+                        fill="#d9d9d9"
                         radius={[4, 4, 0, 0]}
                     />
                 </BarChart>
