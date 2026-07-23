@@ -39,13 +39,12 @@ export default function DashboardPage() {
             </div>
 
             {/* Stats row — placeholder until StatsCards component is built */}
-            {/* <div className="grid grid-cols-4 gap-4">
-               
-            </div> */}
+            {/* <div className="grid grid-cols-4 gap-4"> */}
             <StatsCards />
+            {/* </div> */}
 
             {/* Middle row placeholder */}
-            <div className="grid grid-cols-3 gap-6">
+            <div className="grid grid-cols-2 gap-6">
                 <ProjectProgressChart />
                 <AIInsightsPanel />
             </div>

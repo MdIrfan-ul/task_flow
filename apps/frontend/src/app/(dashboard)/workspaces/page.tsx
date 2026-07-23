@@ -18,7 +18,6 @@ export default function WorkspacesPage() {
     };
 
     // Compute stats from workspaces
-    console.log(workspaceStats);
     const totalMembers = workspaceStats?.active_member ?? 0; // placeholder — replace with real API data
     const activeProjects = workspaceStats?.active_projects ?? 0;
     const storageUsed = 82;
