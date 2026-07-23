@@ -37,7 +37,7 @@ export class AiService {
         try {
             const today = new Date().toISOString().split("T")[0];
             const response = await this.openai.chat.completions.create({
-                model: "llama-3.3-70b-versatile",
+                model: this.MODEL_NAME,
                 max_tokens: 1000,
                 temperature: 0.3,
                 messages: [
@@ -155,7 +155,7 @@ export class AiService {
 
         try {
             const response = await this.openai.chat.completions.create({
-                model: 'gpt-4o-mini',
+                model: this.MODEL_NAME,
                 max_tokens: 800,
                 response_format: { type: 'json_object' },
                 messages: [
