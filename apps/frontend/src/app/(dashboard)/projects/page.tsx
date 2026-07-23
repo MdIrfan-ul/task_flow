@@ -7,7 +7,7 @@ import { useWorkspaces } from "@/hooks/useWorkspaces";
 import { useToast } from "@/components/ui/Toast";
 import Skeleton from "@/components/ui/Skeleton";
 
-interface Project {
+export interface Project {
     id: number;
     name: string;
     description?: string;

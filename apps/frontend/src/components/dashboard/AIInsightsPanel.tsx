@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { apiPost } from "@/lib/api";
+import { apiGet, apiPost } from "@/lib/api";
 import { useToast } from "@/components/ui/Toast";
 
 interface Insight {
@@ -46,29 +46,30 @@ const insightConfig = {
     },
 };
 
-interface AIInsightsPanelProps {
-    projectId?: string;
+interface Project {
+    id: number;
+    name: string;
 }
 
-export default function AIInsightsPanel({ projectId }: AIInsightsPanelProps) {
+interface AIInsightsPanelProps {
+    projects: Project[];
+}
+
+export default function AIInsightsPanel() {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [insights, setInsights] = useState<Insight[]>(PLACEHOLDER_INSIGHTS);
     const { showToast } = useToast();
 
     const runDeepAnalysis = async () => {
-        if (!projectId) {
-            showToast("Select a project to run analysis", "info");
-            return;
-        }
         setIsAnalyzing(true);
+
         try {
-            const data = await apiPost<{ insights: Insight[] }>(
-                `/ai/insights/${projectId}`
+            const data = await apiGet<{ insights: Insight[] }>(
+                "/ai/dashboard-insights"
             );
+
             setInsights(data.insights);
             showToast("Analysis complete", "success");
-        } catch {
-            showToast("Analysis failed. Try again.", "error");
         } finally {
             setIsAnalyzing(false);
         }

@@ -20,6 +20,7 @@ export default function DashboardPage() {
     const { user } = useAuth();
     const firstName = user?.name?.split(" ")[0] ?? "";
 
+
     return (
         <div className="flex flex-col gap-8">
             {/* Header */}

@@ -7,6 +7,9 @@ import { Project } from 'src/projects/entities/project.entity';
 import { User } from 'src/users/entities/user.entity';
 import { buildTaskPrompt, TASK_SYSTEM_PROMPT } from './prompts';
 import { buildProjectSummaryPrompt, PROJECT_SUMMARY_SYSTEM_PROMPT } from './prompts/summarize-workspace.prompt';
+import { buildAIInsightsPrompt } from './prompts/ai-insights.prompt';
+import { Op } from 'sequelize';
+import { WorkspaceMember } from 'src/workspaces/entities/workspace-member.entity';
 
 export interface GeneratedTask {
     title: string;
@@ -24,6 +27,7 @@ export class AiService {
         private readonly configService: ConfigService,
         @InjectModel(Task) private readonly taskRepo: typeof Task,
         @InjectModel(Project) private readonly projectRepo: typeof Project,
+        @InjectModel(WorkspaceMember) private readonly memberRepo: typeof WorkspaceMember,
     ) {
         this.openai = new OpenAI({
             apiKey: this.configService.get<string>('GROQ_API_KEY'),
@@ -194,5 +198,63 @@ export class AiService {
                 blockers: [],
             };
         }
+    }
+    async generateDashboardInsights(userId: number) {
+        // Get workspace ids
+        const memberships = await this.memberRepo.findAll({
+            where: { user_id: userId },
+            attributes: ["workspace_id"],
+        });
+
+        const workspaceIds = memberships.map((m) => m.workspace_id);
+
+        const projects = await this.projectRepo.findAll({
+            where: {
+                workspace_id: {
+                    [Op.in]: workspaceIds,
+                },
+            },
+        });
+
+        const projectIds = projects.map((p) => p.id);
+
+        const tasks = await this.taskRepo.findAll({
+            where: {
+                project_id: {
+                    [Op.in]: projectIds,
+                },
+            },
+            include: [
+                {
+                    model: User,
+                    as: "assignee",
+                    attributes: ["name"],
+                },
+                {
+                    model: Project,
+                    attributes: ["name"],
+                },
+            ],
+        });
+
+        const response = await this.openai.chat.completions.create({
+            model: this.MODEL_NAME,
+            temperature: 0.2,
+            response_format: {
+                type: "json_object",
+            },
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a senior engineering manager.",
+                },
+                {
+                    role: "user",
+                    content: buildAIInsightsPrompt({ projects, tasks }),
+                },
+            ],
+        });
+
+        return JSON.parse(response.choices[0].message.content!);
     }
 }

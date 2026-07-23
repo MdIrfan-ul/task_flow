@@ -1,6 +1,9 @@
 import {
   Body,
   Controller,
+  Get,
+  Param,
+  ParseIntPipe,
   Post,
   Req,
   UseGuards,
@@ -38,7 +41,16 @@ export class AiController {
 
   // POST /ai/summarize
   @Post('summarize')
-  summarize(@Body('projectId') projectId: number) {
+  summarize(
+    @Req() req: AuthRequest,
+    @Body('projectId') projectId: number) {
     return this.aiService.summarizeProject(projectId);
+  }
+
+  // GET /ai/insights:projectId
+
+  @Get('dashboard-insights')
+  aiInsights(@Req() req: AuthRequest) {
+    return this.aiService.generateDashboardInsights(req.user.userId);
   }
 }
